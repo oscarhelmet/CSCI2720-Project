@@ -1,5 +1,7 @@
 # CSCI2720 Project
 
+# Run ```npm install ``` to re-activate the packages. Do not push the node_module to the repo. Tell me if you have installed a new package. 
+
    ## File Structure 
         1. Client
         2. Server 
