@@ -1,8 +1,9 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom'; // Updated this line
+import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom'; 
 import LoginPage from './LoginPage';
 import AdminPage from './AdminPage';
 // import UserPage from './UserPage'; // This is for debugging only
+
 
 class App extends React.Component {
   render() {
