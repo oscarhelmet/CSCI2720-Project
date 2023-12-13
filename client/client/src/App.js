@@ -7,7 +7,6 @@ import AdminPage from './AdminPage';
 class App extends React.Component {
   constructor(props) {
     super(props);
-    // Initially, no one is logged in
     this.state = {
       isAdmin: true,       //for implementing admin page, so it is on 
       isLoggedIn: true
@@ -15,7 +14,6 @@ class App extends React.Component {
   }
 
   logInAsAdmin = () => {
-    // This method would be called when the admin successfully logs in
     this.setState({ isAdmin: true, isLoggedIn: true });
   }
 
@@ -29,11 +27,17 @@ class App extends React.Component {
     return (
       <BrowserRouter>
         <div className="container">
-          <nav className="navbar navbar-expand-lg navbar-light bg-light">
+          <nav className="navbar navbar-expand-lg fixed-top navbar-light bg-light" id='nav-index'>
             <NavLink className="navbar-brand" to="/">Home</NavLink>
-            <div className="ms-auto">
-              <button onClick={this.logOut} className="btn btn-danger rounded-pill"> <i class="bi bi-key"></i> Log Out</button>
-            </div>
+            {this.state.isLoggedIn && (
+              <>
+                <div className="ms-auto" id='logout'>
+                  <button onClick={this.logOut} className="btn btn-danger rounded-pill">
+                    <i className="bi bi-key"></i> Log Out
+                  </button>
+                </div>
+              </>
+            )}
           </nav>
           <hr />
           <Routes>

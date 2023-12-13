@@ -25,20 +25,27 @@ class AdminPage extends React.Component {
     const { currentEntity } = this.state;
     const CRUDComponent = currentEntity === 'Event' ? EventCRUD : UserCRUD;
     return (
-      <div className="container mt-5">
-        <h2>Admin Dashboard</h2>
-        <br />
 
+      <div className="container mt-5 bg-light rounded" id="main-cont">
+        <div className="rowl">
+          <br />
+          <h4><b>Admin Dashboard</b></h4>
+          <br />
+          <button onClick={this.toggleEntity} className="btn btn-warning rounded-pill">
+            Switch to {currentEntity === 'Event' ? <i class="bi bi-person-badge-fill h4"></i> : <i class="bi bi-calendar-week h4"></i>}
+          </button>
+          <br />
 
-        <button onClick={this.toggleEntity} className="btn btn-warning">
-          Switch to {currentEntity === 'Event' ? 'User' : 'Event'}
-        </button>
+        </div>
+
         <br /><br />
-        <h3>Now Editing: {currentEntity}</h3>
-        <CRUDComponent />
 
+        <div className="rowr">
+          <h3>{currentEntity} Dashboard </h3>
+          <CRUDComponent />
+        </div>
 
-        <br/>
+        <br />
 
       </div>
     );

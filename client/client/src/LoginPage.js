@@ -1,6 +1,7 @@
 import React from 'react';
 import './LoginPage.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import logo from './assets/images/login.png';
 
 class LoginPage extends React.Component {
   constructor(props) {
@@ -26,6 +27,7 @@ class LoginPage extends React.Component {
         <div class="container-login100">
           <div class="wrap-login100">
             <div class="login100-pic js-tilt" data-tilt>
+            <img src={logo} alt="Logo" />
             </div>
             <form class="login100-form validate-form">
               <span class="login100-form-title">
@@ -47,23 +49,10 @@ class LoginPage extends React.Component {
               </div>
               <div class="container-login100-form-btn">
                 <button class="login100-form-btn">
-                  Login
+                  Login <i class="bi bi-arrow-right" aria-hidden="true"></i>
                 </button>
               </div>
-              <div class="text-center p-t-12">
-                <span class="txt1">
-                  Forgot
-                </span>
-                <a class="txt2" href="#">
-                  Username / Password?
-                </a>
-              </div>
-              <div class="text-center p-t-136">
-                <a class="txt2" href="#">
-                  Create your Account
-                  <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                </a>
-              </div>
+              
             </form>
           </div>
         </div>

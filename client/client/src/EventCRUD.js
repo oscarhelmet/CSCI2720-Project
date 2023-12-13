@@ -18,6 +18,7 @@ class EventCRUD extends React.Component {
             showUpdateModal: false,
             showDeleteModal: false,
             selectedEventId: null,
+            selectedEvent: null,
 
             events: [ // Dummy event data
                 {
@@ -40,19 +41,99 @@ class EventCRUD extends React.Component {
     }
 
 
-    toggleModal = (modalName, eventID = null) => {
-        this.setState(prevState => ({
-            [modalName]: !prevState[modalName],
-            selectedEventId: eventID,
-            selectedEvent: eventID ? this.state.events.find(event => event.eventID === eventID) : null,
-        }));
-    }
+    toggleModal = (modalKey, eventId = null) => {
+        let newState = { [modalKey]: !this.state[modalKey] };
+
+
+        if (eventId && modalKey === 'showDeleteModal') {
+            const event = this.findEventById(eventId);
+            this.setState({ selectedEvent: event });
+
+            this.setState((prevState) => ({ [modalKey]: !prevState[modalKey] }));
+            return;
+        }
+        if (eventId && modalKey === 'showUpdateModal') {
+            const event = this.findEventById(eventId);
+            if (event) {
+                newState = {
+                    ...newState,
+                    selectedEvent: event,
+                    eventName: event.eventName,
+                    eventID: event.eventID,
+                    eventVenue: event.eventVenue,
+                    eventDescription: event.eventDescription,
+                    eventPresenter: event.eventPresenter,
+                    price: event.price,
+                };
+            }
+        } else if (!this.state[modalKey]) {
+            // Reset the form if the modal is being closed
+            newState = {
+                ...newState,
+                selectedEvent: null,
+                eventName: '',
+                eventID: '',
+                eventVenue: '',
+                eventDescription: '',
+                eventPresenter: '',
+                price: '',
+            };
+        }
+
+        this.setState(newState);
+    };
+
 
 
     handleInputChange = (event) => {
         const { name, value } = event.target;
         this.setState({ [name]: value });
     }
+
+    handleDeleteEvent = () => {
+        const { selectedEvent, events } = this.state;
+        if (selectedEvent) {
+            const updatedEvents = events.filter(event => event.eventID !== selectedEvent.eventID);
+            this.setState({
+                events: updatedEvents,
+                selectedEvent: null, // Reset selected event
+                showDeleteModal: false // Close the modal
+            });
+            this.toggleModal('showDeleteModal');
+        }
+    };
+
+    handleUpdateEvent = (event) => {
+        event.preventDefault();
+        const updatedEvent = {
+            eventName: this.state.eventName,
+            eventVenue: this.state.eventVenue,
+            eventDescription: this.state.eventDescription,
+            eventPresenter: this.state.eventPresenter,
+            price: this.state.price,
+        };
+
+        this.updateEvent(updatedEvent);
+    };
+
+    updateEvent = (updatedEvent) => {
+
+        this.setState(prevState => ({
+            events: prevState.events.map(event =>
+                event.id === updatedEvent.id ? updatedEvent : event
+            )
+        }));
+
+        this.toggleModal('showUpdateModal');
+    };
+
+
+    findEventById(eventId) {
+        return this.state.events.find(event => event.eventID === eventId);
+    }
+
+
+
     // CRUD operations 
 
     handleCREATE = async (event) => {
@@ -77,14 +158,14 @@ class EventCRUD extends React.Component {
                 body: JSON.stringify(data)
             })
             if (response.status === 200) {
-                console.log(response.data);
+                alert(response.data);
             }
             else {
-                console.log("error" + response);
+                alert("error" + response);
             }
         }
         catch (error) {
-            console.error('Error creating event:', error);
+            alert('Error creating event:', error);
         }
     }
 
@@ -103,14 +184,14 @@ class EventCRUD extends React.Component {
                 body: JSON.stringify(data)
             })
             if (response.status === 200) {
-                console.log(response.data);
+                alert(response.data);
             }
             else {
-                console.log("error" + response);
+                alert("error" + response);
             }
         }
         catch (error) {
-            console.error('Error creating event:', error);
+            alert('Error creating event:', error);
         }
 
     }
@@ -136,14 +217,14 @@ class EventCRUD extends React.Component {
                 body: JSON.stringify(data)
             })
             if (response.status === 200) {
-                console.log(response.data);
+                alert(response.data);
             }
             else {
-                console.log("error" + response);
+                alert("error" + response);
             }
         }
         catch (error) {
-            console.error('Error creating event:', error);
+            alert('Error creating event:', error);
         }
 
 
@@ -165,17 +246,17 @@ class EventCRUD extends React.Component {
                 body: JSON.stringify(data)
             })
             if (response.status === 200) {
-                console.log(response.data);
+                alert(response.data);
             }
             else if (response.status === 404) {
-                console.log("Event NOT Found");
+                alert("Event NOT Found");
             }
             else {
-                console.log("error" + response);
+                alert("error" + response);
             }
         }
         catch (error) {
-            console.error('Error creating event:', error);
+            alert('Error creating event:', error);
         }
 
     }
@@ -190,7 +271,7 @@ class EventCRUD extends React.Component {
         return (
 
 
-            <div className="container mt-5" id="creater">
+            <div className="container mt-5" id="crud">
 
 
 
@@ -203,15 +284,15 @@ class EventCRUD extends React.Component {
                 < Modal show={showCreateModal} handleClose={() => this.toggleModal('showCreateModal')}>
 
                     {/* Create Event */}
-                    <div className="container px-4 p-3 border bg-light rounded" >
+                    <div className="container px-4 p-3 border bg-light rounded">
                         <h2>Create Event</h2>
-                        <form onSubmit={this.handleCREATE}>
+                        <form onSubmit={this.state.handleCREATE}>
                             <fieldset>
                                 <div className="form-group">
                                     <label htmlFor="eventName">Event Title:</label>
                                     <input
+                                        class="inputC"
                                         type="text"
-                                        className="form-control"
                                         id="eventName"
                                         name="eventName"
                                         value={this.state.eventName}
@@ -220,9 +301,8 @@ class EventCRUD extends React.Component {
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="eventID">ID:</label>
-                                    <input
+                                    <input class="inputC"
                                         type="number"
-                                        className="form-control"
                                         id="eventID"
                                         name="eventID"
                                         value={this.state.eventID}
@@ -230,10 +310,9 @@ class EventCRUD extends React.Component {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="eventVenue">Venue ID:</label>
-                                    <input
+                                    <label htmlFor="eventVenue">Venue:</label>
+                                    <input class="inputC"
                                         type="number"
-                                        className="form-control"
                                         id="eventVenue"
                                         name="eventVenue"
                                         value={this.state.eventVenue}
@@ -243,30 +322,28 @@ class EventCRUD extends React.Component {
                                 <div className='form-group'>
                                     <label htmlFor="eventDescription">Description:</label>
                                     <textarea
+                                        class="inputT"
                                         type="text"
-                                        className="form-control"
-                                        id="eventID"
-                                        name="eventID"
+                                        id="eventDescription"
+                                        name="eventDescription"
                                         value={this.state.eventDescription}
                                         onChange={this.handleInputChange}
                                     />
                                 </div>
                                 <div className='form-group'>
                                     <label htmlFor="eventPresenter">Presenter:</label>
-                                    <input
+                                    <input class="inputC"
                                         type="text"
-                                        className="form-control"
-                                        id="eventID"
-                                        name="eventID"
+                                        id="eventPresenter"
+                                        name="eventPresenter"
                                         value={this.state.eventPresenter}
                                         onChange={this.handleInputChange}
                                     />
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="price">Price:</label>
-                                    <input
+                                    <input class="inputC"
                                         type="number"
-                                        className="form-control"
                                         id="price"
                                         name="price"
                                         value={this.state.price}
@@ -321,7 +398,7 @@ class EventCRUD extends React.Component {
                             <tr className='table-info'>
                                 <th scope="col">ID</th>
                                 <th scope="col">Event Title</th>
-                                <th scope="col">Venue ID</th>
+                                <th scope="col">Venue</th>
                                 <th scope="col">Description</th>
                                 <th scope="col">Presenter</th>
                                 <th scope="col">Price</th>
@@ -340,12 +417,12 @@ class EventCRUD extends React.Component {
                                     <td>{event.eventPresenter}</td>
                                     <td>{event.price}</td>
                                     <td>
-                                        <button onClick={() => this.toggleModal('showUpdateModal', event.eventID)} className="btn btn-outline-primary rounded-circle">
+                                        <button onClick={() => this.toggleModal('showUpdateModal', event.eventID)} className="btn btn-outline-primary btn-circle btn-xl">
                                             <i class="bi bi-pencil-square h5"></i>
                                         </button>
                                     </td>
                                     <td>
-                                        <button onClick={() => this.toggleModal('showDeleteModal', event.eventID)} className="btn btn-outline-danger rounded-circle">
+                                        <button onClick={() => this.toggleModal('showDeleteModal', event.eventID)} className="btn btn-outline-danger btn-circle btn-xl">
                                             <i class="bi bi-trash3-fill h5"></i>
                                         </button>
                                     </td>
@@ -358,93 +435,90 @@ class EventCRUD extends React.Component {
 
                 <br />
 
-                < Modal show={showUpdateModal} handleClose={() => this.toggleModal('showUpdateModal')}>
-
-                    {/* Update Event */}
-                    <div className="container px-4 p-3 border bg-light" id="updater">
-                        <form onSubmit={this.handleCREATE}>
+                <Modal show={this.state.showUpdateModal} handleClose={() => this.toggleModal('showUpdateModal')}>
+                    <div className="container px-4 py-3 border bg-light" id="updater">
+                        <form onSubmit={this.handleUpdateEvent}>
                             <legend> Update Event</legend>
-                            <div className="form-group">
-                                <label htmlFor="eventName">Event Title:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="eventName"
-                                    name="eventName"
-                                    value={this.state.eventName}
-                                    onChange={this.handleInputChange}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="eventID">ID:</label>
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="eventID"
-                                    name="eventID"
-                                    value={this.state.eventID}
-                                    onChange={this.handleInputChange}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="eventVenue">Venue ID:</label>
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="eventVenue"
-                                    name="eventVenue"
-                                    value={this.state.eventVenue}
-                                    onChange={this.handleInputChange}
-                                />
-                            </div>
-                            <div className='form-group'>
-                                <label htmlFor="eventDescription">Description:</label>
-                                <textarea
-                                    type="text"
-                                    className="form-control"
-                                    id="eventID"
-                                    name="eventID"
-                                    value={this.state.eventDescription}
-                                    onChange={this.handleInputChange}
-                                />
-                            </div>
-                            <div className='form-group'>
-                                <label htmlFor="eventPresenter">Presenter:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="eventID"
-                                    name="eventID"
-                                    value={this.state.eventPresenter}
-                                    onChange={this.handleInputChange}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="price">Price:</label>
-                                <input
-                                    type="number"
-                                    className="form-control"
-                                    id="price"
-                                    name="price"
-                                    value={this.state.price}
-                                    onChange={this.handleInputChange}
-                                />
-                            </div>
-                            <br />
-                            <button type="submit" className="btn btn-outline-primary">Create Event</button>
+                            <fieldset>
+                                <div className="form-group">
+                                    <label htmlFor="eventName">Event Title:</label>
+                                    <input
+                                        class="inputC"
+                                        type="text"
+                                        id="eventName"
+                                        name="eventName"
+                                        value={this.state.eventName}
+                                        onChange={this.handleInputChange}
+                                    />
+                                </div>
+                                <fieldset disabled = 'true'>
+                                <div className="form-group">
+                                    <label htmlFor="eventID">ID:</label>
+                                    <input class="inputC"
+                                        type="number"
+                                        id="eventID"
+                                        name="eventID"
+                                        value={this.state.eventID}
+                                        onChange={this.handleInputChange}
+                                    />
+                                </div>
+                                </fieldset>
+                                <div className="form-group">
+                                    <label htmlFor="eventVenue">Venue:</label>
+                                    <input class="inputC"
+                                        type="number"
+                                        id="eventVenue"
+                                        name="eventVenue"
+                                        value={this.state.eventVenue}
+                                        onChange={this.handleInputChange}
+                                    />
+                                </div>
+                                <div className='form-group'>
+                                    <label htmlFor="eventDescription">Description:</label>
+                                    <textarea
+                                        class="inputT"
+                                        type="text"
+                                        id="eventDescription"
+                                        name="eventDescription"
+                                        value={this.state.eventDescription}
+                                        onChange={this.handleInputChange}
+                                    />
+                                </div>
+                                <div className='form-group'>
+                                    <label htmlFor="eventPresenter">Presenter:</label>
+                                    <input class="inputC"
+                                        type="text"
+                                        id="eventPresenter"
+                                        name="eventPresenter"
+                                        value={this.state.eventPresenter}
+                                        onChange={this.handleInputChange}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="price">Price:</label>
+                                    <input class="inputC"
+                                        type="number"
+                                        id="price"
+                                        name="price"
+                                        value={this.state.price}
+                                        onChange={this.handleInputChange}
+                                    />
+                                </div>
+                                <br />
+                                <button type="submit" className="btn btn-outline-primary">Update Event</button>
+                            </fieldset>
                         </form>
                     </div>
-                </Modal >
+                </Modal>
                 <br />
 
 
 
                 <Modal show={showDeleteModal} handleClose={() => this.toggleModal('showDeleteModal')}>
-                    {/* Delete Event Confirmation */}
                     <div className="container px-4 py-3 border bg-light">
-                        {selectedEvent&& (
+                        {selectedEvent && (
                             <div>
-                                <p>Are you sure you want to delete event ID {selectedEvent.id}: {selectedEvent.title}?</p>
+                                <p>Are you sure you want to delete event ID {selectedEvent.eventID}: {selectedEvent.eventName}?</p>
                                 <button type="button" className="btn btn-danger" onClick={this.handleDeleteEvent}>
                                     Delete
                                 </button>
@@ -457,28 +531,5 @@ class EventCRUD extends React.Component {
     }
 }
 
-export default EventCRUD;                
+export default EventCRUD;
 
-// < Modal show={showDeleteModal} handleClose={() => this.toggleModal('showDeleteModal')}>
-
-//                     {/* Delete Event */}
-//                     <div className="container px-4 p-3 border bg-light" id="deleter">
-//                         <form id="delete-event-form" onSubmit={this.handleDELETE}>
-//                             <legend>Delete Event: </legend>
-//                             <div className="mb-3">
-//                                 <label className="form-label" htmlFor="eventID">Event ID:</label>
-//                                 <input
-//                                     className="form-control"
-//                                     type="number"
-//                                     id="eventID"
-//                                     name="eventID"
-//                                     value={this.state.eventID}
-//                                     onChange={this.handleInputChange}
-//                                     required
-//                                 />
-//                             </div>
-//                             <button type="submit" className="btn btn-outline-primary">Delete</button>
-//                         </form>
-//                     </div>
-
-//                 </Modal >
