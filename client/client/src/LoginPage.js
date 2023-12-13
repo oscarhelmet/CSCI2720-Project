@@ -1,4 +1,6 @@
 import React from 'react';
+import './LoginPage.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 class LoginPage extends React.Component {
   constructor(props) {
@@ -18,29 +20,53 @@ class LoginPage extends React.Component {
 
   render() {
     return (
-      <div className="container mt-5">
-        <h2>Login</h2>
-        <form onSubmit={this.handleLogin}>
-          <div className="form-group">
-            <label>Username:</label>
-            <input
-              type="text"
-              className="form-control"
-              value={this.state.username}
-              onChange={(e) => this.setState({ username: e.target.value })}
-            />
+    
+
+      <div class="limiter">
+        <div class="container-login100">
+          <div class="wrap-login100">
+            <div class="login100-pic js-tilt" data-tilt>
+            </div>
+            <form class="login100-form validate-form">
+              <span class="login100-form-title">
+                Member Login
+              </span>
+              <div class="wrap-input100 validate-input" data-validate="Valid email is required: ex@abc.xyz">
+                <input class="input100" type="text" name="email" placeholder="Email"/>
+                  <span class="focus-input100"></span>
+                  <span class="symbol-input100">
+                    <i class="bi bi-envelope" aria-hidden="true"></i>
+                  </span>
+              </div>
+              <div class="wrap-input100 validate-input" data-validate="Password is required">
+                <input class="input100" type="password" name="pass" placeholder="Password"/>
+                  <span class="focus-input100"></span>
+                  <span class="symbol-input100">
+                    <i class="bi bi-lock" aria-hidden="true"></i>
+                  </span>
+              </div>
+              <div class="container-login100-form-btn">
+                <button class="login100-form-btn">
+                  Login
+                </button>
+              </div>
+              <div class="text-center p-t-12">
+                <span class="txt1">
+                  Forgot
+                </span>
+                <a class="txt2" href="#">
+                  Username / Password?
+                </a>
+              </div>
+              <div class="text-center p-t-136">
+                <a class="txt2" href="#">
+                  Create your Account
+                  <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+              </div>
+            </form>
           </div>
-          <div className="form-group">
-            <label>Password:</label>
-            <input
-              type="password"
-              className="form-control"
-              value={this.state.password}
-              onChange={(e) => this.setState({ password: e.target.value })}
-            />
-          </div>
-          <button type="submit" className="btn btn-primary">Login</button>
-        </form>
+        </div>
       </div>
     );
   }
