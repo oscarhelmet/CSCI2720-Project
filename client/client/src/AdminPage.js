@@ -11,7 +11,6 @@ class AdminPage extends React.Component {
       currentEntity: 'Event',
     };
     this.toggleEntity = this.toggleEntity.bind(this);
-    this.logOut = this.logOut.bind(this);
   }
 
   // Method should be bound in the constructor or defined as an arrow function
@@ -19,13 +18,6 @@ class AdminPage extends React.Component {
     this.setState(prevState => ({
       currentEntity: prevState.currentEntity === 'Event' ? 'User' : 'Event',
     }));
-  }
-
-
-
-  logOut() {
-    // Handle logout logic, such as clearing the session
-    this.props.history.push('/login');
   }
 
 
@@ -43,12 +35,10 @@ class AdminPage extends React.Component {
         </button>
         <br /><br />
         <h3>Now Editing: {currentEntity}</h3>
-
         <CRUDComponent />
 
 
         <br/>
-        <button onClick={this.logOut} className="btn btn-danger">Log Out</button>
 
       </div>
     );
