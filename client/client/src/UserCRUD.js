@@ -1,6 +1,5 @@
 import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'; 
-import 'bootstrap-icons/font/bootstrap-icons.css';
+
 
 
 
@@ -8,9 +7,27 @@ class UserCRUD extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            userid: '',
             username: '',
             password: '',
+            Admin: '',
+            pinned: [],
+            showCreateUserModal: false,
+            showReadUserModal: false,
+            showUpdateUserModal: false,
+            showDeleteUserModal: false,
+            selectedUserId: null,
+            selectedUser: null,
+            currentPage: 1,
+            usersPerPage: 10,
+            animateChange: true,
+            users: [],
+            totalPages: 0,
         };
+    }
+
+    componentDidMount() {
+        this.fetchUsers();
     }
 
     handleInputChange = (event) => {
@@ -18,7 +35,7 @@ class UserCRUD extends React.Component {
         this.setState({ [name]: value });
     }
 
-    handleCREATE = async (event) => {
+    handleCREATEUser = async (event) => {
         event.preventDefault();
         const { username, password } = this.state;
         const data = {
@@ -47,7 +64,7 @@ class UserCRUD extends React.Component {
         }
     }
 
-    handleREAD = async (event) => {
+    handleREADUser = async (event) => {
         event.preventDefault();
         const { username } = this.state;
         const data = { username: username, };
@@ -74,7 +91,7 @@ class UserCRUD extends React.Component {
 
     }
 
-    handleUPDATE = async (event) => {
+    handleUPDATEUser = async (event) => {
         event.preventDefault();
         const { username, password } = this.state;
         const data = {
@@ -107,7 +124,7 @@ class UserCRUD extends React.Component {
     }
 
 
-    handleDELETE = async (event) => {  //please change the url
+    handleDELETEUser = async (event) => {  //please change the url
         event.preventDefault();
         const { username } = this.state;
         const data = { username: username, };

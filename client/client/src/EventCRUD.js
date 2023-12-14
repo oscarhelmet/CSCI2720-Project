@@ -1,5 +1,4 @@
 import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Modal from './Modal';
 import './CRUD.css';
 
@@ -82,16 +81,30 @@ class EventCRUD extends React.Component {
 
     toggleModal = async (modalKey, eventId = null) => {
         let newState = { [modalKey]: !this.state[modalKey] };
-
+        
 
         if (eventId && modalKey === 'showDeleteModal') {
-            const event = this.findEventById(eventId);
-            this.setState({ selectedEvent: event });
+           try{ const event = await this.handleREAD(eventId);
+                if (event !== 404) {
+                    this.setState({ 
+                        showDeleteModal: true,
+                        selectedEvent: event });
 
-            this.setState((prevState) => ({ modalKey: !prevState[modalKey] }));
-            return;
+                    this.setState((prevState) => ({ modalKey: !prevState[modalKey] }));
+                    return;
+                } else {
+                    alert('Event Not Found');
+                    this.setState({
+                        showDeleteModal: false,
+                        modalKey: !this.state[modalKey]
+                    });
+                    return;
+                }}catch (error) {
+                    console.error('Failed to show update modal:', error);
+                }
+
         }
-        if (eventId && modalKey === 'showUpdateModal') {
+        else if (eventId && modalKey === 'showUpdateModal') {
             try {
                 const event = await this.handleREAD(eventId);
                 if (event !== 404) {
@@ -116,8 +129,7 @@ class EventCRUD extends React.Component {
             } catch (error) {
                 console.error('Failed to show update modal:', error);
             }
-        } else if (!this.state[modalKey]) {
-            // Reset the form if the modal is being closed
+        } else if (eventId === null) {
             newState = {
                 ...newState,
                 selectedEvent: null,
@@ -131,9 +143,7 @@ class EventCRUD extends React.Component {
         }
 
         this.setState(newState, () => {
-            // This function gets called after state has been updated
             console.log(this.state);
-            // Here you can perform actions that depend on the new state
         });
     };
 
@@ -163,44 +173,7 @@ class EventCRUD extends React.Component {
         });
     }
 
-    handleDeleteEvent = () => {
-        const { selectedEvent, events } = this.state;
-        if (selectedEvent) {
-            const updatedEvents = events.filter(event => event.eventID !== selectedEvent.eventID);
-            this.setState({
-                events: updatedEvents,
-                selectedEvent: null, // Reset selected event
-                showDeleteModal: false // Close the modal
-            });
-            this.toggleModal('showDeleteModal');
-        }
-    };
-
-    handleUpdateEvent = (event) => {
-        event.preventDefault();
-        const updatedEvent = {
-            title: this.state.title,
-            venueID: this.state.venueID,
-            description: this.state.description,
-            presenter: this.state.presenter,
-            price: this.state.price,
-        };
-
-        this.updateEvent(updatedEvent);
-    };
-
-    updateEvent = (updatedEvent) => {
-
-        this.setState(prevState => ({
-            events: prevState.events.map(event =>
-                event.id === updatedEvent.id ? updatedEvent : event
-            )
-        }));
-
-        this.toggleModal('showUpdateModal');
-    };
-
-
+   
     findEventById(eventId) {
         return this.state.events.find(event => event.eventID === eventId);
     }
@@ -254,26 +227,24 @@ class EventCRUD extends React.Component {
             presenter: presenter,
             price: price,
         };
-
-
+    
         try {
-            const response = await fetch(`http://localhost:${port}/event/${eventID}`, {    //please change the url
+            const response = await fetch(`http://localhost:${port}/event`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
-            })
-            if (response.status === 200) {
-                alert(response.data);
+            });
+    
+            if (response.status === 201) {
+                alert("Successfully Created");
+            } else {
+                const errorMessage = await response.text();
+                alert(errorMessage || "An error occurred, please try again.");
             }
-            else {
-                alert("error" + response);
-                return response;
-            }
-        }
-        catch (error) {
-            alert('Error creating event:', error);
+        } catch (error) {
+            console.error('Error creating event:', error.message);
         }
     }
 
@@ -304,8 +275,9 @@ class EventCRUD extends React.Component {
 
     handleUPDATE = async (event) => {
         event.preventDefault();
-        const { title, venueID, description, presenter, price } = this.state;
+        const { title, eventID, venueID, description, presenter, price } = this.state;
         const data = {
+            eventID: eventID,
             title: title,
             venueID: venueID,
             description: description,
@@ -315,44 +287,44 @@ class EventCRUD extends React.Component {
 
 
         try {
-            const response = await fetch(`http://localhost:${port}/event/`, {    //please change the url
+            const response = await fetch(`http://localhost:${port}/event`, {    //please change the url
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
             })
-            if (response.status === 200) {
-                alert(response.data);
+            if (response.status === 202) {
+                alert("Successfully Updated");
+                window.location.reload();
             }
             else {
-                alert("error" + response);
+                alert("error" + response.status);
+                return response;
             }
         }
         catch (error) {
-            alert('Error Update event:', error);
+            alert('Error creating event:', error);
         }
-
-
     }
 
 
-    handleDELETE = async (event) => {  //please change the url
-        event.preventDefault();
-        const { eventID } = this.state;
+
+    handleDELETE = async (eventID) => {  //please change the url
+
         const data = { eventID: eventID, };
 
-
         try {
-            const response = await fetch(`http://localhost:${port}/event/${eventID}`, {    //please change the url
+            const response = await fetch(`http://localhost:${port}/event`, {    //please change the url
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
             })
-            if (response.status === 200) {
-                alert(response.data);
+            if (response.status === 202) {
+                alert("Event Deleted");
+                window.location.reload();
             }
             else if (response.status === 404) {
                 alert("Event NOT Found");
@@ -396,7 +368,7 @@ class EventCRUD extends React.Component {
 
                     {/* Create Event */}
                     <div className="container px-4 p-3 border bg-light rounded-5">
-                        <form onSubmit={this.handleUpdateEvent}>
+                        <form onSubmit={this.handleCREATE}>
                             <legend> Event Details</legend>
                             <fieldset>
                                 <div className="form-group d-flex" style={{ alignItems: 'center', gap: '1rem' }}>
@@ -581,7 +553,7 @@ class EventCRUD extends React.Component {
 
                 <Modal show={this.state.showUpdateModal} handleClose={() => this.toggleModal('showUpdateModal')}>
                     <div className="container px-4 py-3 border bg-light rounded-5" id="updater">
-                        <form onSubmit={this.handleUpdateEvent}>
+                        <form onSubmit={this.handleUPDATE}>
                             <legend> Event Details</legend>
                             <fieldset>
                                 <div className="form-group d-flex" style={{ alignItems: 'center', gap: '1rem' }}>
@@ -633,7 +605,6 @@ class EventCRUD extends React.Component {
                                             onChange={this.handleVenueChange}
                                             disabled={this.state.venues.length === 0}
                                         >
-                                            <option value="">Select a Venue</option>
                                             {this.state.venues.map(venue => (
                                                 <option key={venue.venueID} value={venue.venue}>
                                                     {venue.venue}
@@ -677,7 +648,7 @@ class EventCRUD extends React.Component {
                                 <div className="d-flex justify-content-between">
                                     <button type="submit" className="btn btn-outline-primary rounded-pill">Update Event</button>
 
-                                    <button type="button" className="btn btn-danger rounded-pill ms-auto" onClick={this.handleDELETE}>
+                                    <button type="button" className="btn btn-danger rounded-pill ms-auto" onClick={() => this.handleDELETE(this.state.eventID)}>
                                         <i class="bi bi-trash3-fill"></i>
                                     </button>
                                 </div>
@@ -695,7 +666,7 @@ class EventCRUD extends React.Component {
                             <div>
                                 <p><h3><b>ARE YOU SURE</b></h3><br />
                                     you want to delete event ID {selectedEvent.eventID}: <br />{selectedEvent.title}?</p>
-                                <button type="button" className="btn btn-danger rounded-cicle" onClick={this.handleDELETE}>
+                                <button type="button" className="btn btn-danger rounded-cicle" onClick={() => this.handleDELETE(selectedEvent.eventID)}>
                                     Delete
                                 </button>
                             </div>

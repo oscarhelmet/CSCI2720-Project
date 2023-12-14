@@ -4,6 +4,11 @@ import LoginPage from './LoginPage';
 import AdminPage from './AdminPage';
 import UserPage from './UserPage';
 import LocationDetail from './LocationDetail';
+import 'bootstrap/dist/css/bootstrap.min.css'; 
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Modal from './Modal';
+import './CRUD.css';
 
 
 class App extends React.Component {
