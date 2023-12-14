@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-do
 import LoginPage from './LoginPage';
 import AdminPage from './AdminPage';
 import UserPage from './UserPage';
+import LocationDetail from './LocationDetail';
 
 
 class App extends React.Component {
@@ -48,6 +49,8 @@ class App extends React.Component {
             {/* <Route path="/user" element={<UserPage />} /> */}
             <Route path="/admin" element={<AdminPage />} />   {/*This is for debugging only*/}
             <Route path="/user" element={<UserPage />} /> 
+            <Route path='/user/:id' element={<LocationDetail/>}/>
+            
              
 
             <Route path="/admin" element={isAdmin ? <AdminPage /> : <Navigate to="/" />} />

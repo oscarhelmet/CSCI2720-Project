@@ -1,8 +1,11 @@
 import React from 'react';
 
+import { useNavigate } from 'react-router-dom';
 
 
-
+// require('react-dom');
+// window.React2 = require('react');
+// console.log(window.React1 === window.React2);
 let venueInformation;
 
 
@@ -14,7 +17,7 @@ class UserPage extends React.Component {
     super(props);
     this.state = {
       data: null,
-     
+
     };
   }
   componentDidMount(){
@@ -31,8 +34,6 @@ class UserPage extends React.Component {
    
 
   }
-
- 
 
 
   Sort = function(order){
@@ -52,6 +53,7 @@ class UserPage extends React.Component {
     
     
   }
+  
  
 
   render(){
@@ -65,7 +67,7 @@ class UserPage extends React.Component {
 
 
 
-      <div>
+      <div className='mt-5'>
         
         <button  className="btn btn-info m-2" onClick={()=>this.Sort(true)}>Sort in ascending order</button>
         <button  className="btn btn-info m-2" onClick={()=>this.Sort(false)}>Sort in descending order</button>
@@ -109,26 +111,71 @@ class UserPage extends React.Component {
 
 
 
-class LocationTable extends React.Component{
+function LocationTable(props){
+  let i = props.i;
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate(`/user/`+venueInformation[i].venueID);
+  };
+  // console.log(venueInformation[i]);
 
-  
-  
-  render(){
+  return(
+    <tr onClick={()=>handleClick()}>
+      
+        <th scope="row">{venueInformation[i].venueID}</th>
+        <td>{venueInformation[i].venue}</td>
+        <td>{venueInformation[i].eventlist.length}</td>
+
+    </tr>
     
-    let i = this.props.i;
+  )
 
-      return(
-        
-          <tr >
-            <th scope="row">{venueInformation[i].venueID}</th>
-            <td>{venueInformation[i].venue}</td>
-            <td>{venueInformation[i].eventlist.length}</td>
-          </tr>
-        
-        
-      )
-  }
 }
 
-export default UserPage;
+// function LocationDetail(){
 
+  
+//   const { id } = useParams();
+
+ 
+//   return(
+//     <div className='mt-5'>
+//         {id}
+//     </div>
+//   )
+
+
+// }
+
+
+
+
+
+
+
+// class LocationTable extends React.Component{
+
+  
+  
+//   render(){
+    
+//     let i = this.props.i;
+//     const navigate = useNavigate();
+//     const handleClick = () => {
+      
+//       navigate('/location ');
+//     };
+//       return(
+//         <tr>
+          
+//             <th scope="row">{venueInformation[i].venueID}</th>
+//             <td>{venueInformation[i].venue}</td>
+//             <td>{venueInformation[i].eventlist.length}</td>
+    
+//         </tr>
+        
+//       )
+//   }
+// }
+
+export default UserPage;
