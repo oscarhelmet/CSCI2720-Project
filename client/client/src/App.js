@@ -2,7 +2,8 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import AdminPage from './AdminPage';
-// import UserPage from './UserPage'; // Commented out as it's not finished
+import UserPage from './UserPage';
+
 
 class App extends React.Component {
   constructor(props) {
@@ -29,6 +30,8 @@ class App extends React.Component {
         <div className="container">
           <nav className="navbar navbar-expand-lg fixed-top navbar-light bg-light" id='nav-index'>
             <NavLink className="navbar-brand" to="/">Home</NavLink>
+            <NavLink className="navbar-brand" to="/admin">Admin</NavLink>
+            <NavLink className="navbar-brand" to="/user">User</NavLink>
             {this.state.isLoggedIn && (
               <>
                 <div className="ms-auto" id='logout'>
@@ -43,6 +46,10 @@ class App extends React.Component {
           <Routes>
             <Route path="/" element={isLoggedIn ? (isAdmin ? <Navigate to="/admin" /> : <Navigate to="/user" />) : <LoginPage logInAsAdmin={this.logInAsAdmin} />} />
             {/* <Route path="/user" element={<UserPage />} /> */}
+            <Route path="/admin" element={<AdminPage />} />   {/*This is for debugging only*/}
+            <Route path="/user" element={<UserPage />} /> 
+             
+
             <Route path="/admin" element={isAdmin ? <AdminPage /> : <Navigate to="/" />} />
           </Routes>
         </div>
