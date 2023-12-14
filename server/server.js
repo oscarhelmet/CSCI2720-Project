@@ -762,13 +762,13 @@ db.once('open', function () {
 
 
     // For Users Data CRUD access for admin role
-    //Create the users data (admin)
+    //Create the users data (admin) //work
     app.post('/user', (req, res) => {
         const UserName = req.body.UserName;
         const UserPwHash = req.body.UserPwHash;
         const Admin = req.body.Admin;
-        const Comments = req.body.Comments;
-        const Pinned = req.body.Pinned;
+        const Comments = null;// append in later Comments CRUD
+        const Pinned = null;//append in later Pinned CRUD
         User.findOne().sort({UserId: -1 }).then((result) => {
             console.log(result.UserId);
             if(result === null){
@@ -781,12 +781,13 @@ db.once('open', function () {
                 let newUserId = result.UserId + 1;
                 let newUser = new User({
                     UserId: newUserId,
-                    UserName: req.params['UserName'],
-                    UserPwHash: req.params['UserPwHash'],
-                    Admin: req.params['Admin'],
-                    Comments: null,
-                    Pinned: null
+                    UserName: UserName,
+                    UserPwHash: UserPwHash,
+                    Admin: Admin,
+                    Comments: [],
+                    Pinned: []
                 });
+                console.log(newUser);
                 User.create(newUser)
                 .then(() => {
                     res.status(201);
@@ -798,15 +799,13 @@ db.once('open', function () {
         });
     });
 
-    //Read the users data (admin)
+    //Read the users data (admin) //work
     app.get('/user/:UserId', (req, res) => {
         User.findOne({ UserId: { $eq: req.params.UserId}})
         .then((p) => {
             console.log(p);
             if (p === null) { 
-            const message = `
-            No user with such userID is found
-            `;
+            const message = 'No user with such userID is found';
             res.setHeader('Content-Type', 'text/plain');
             res.statusCode = 404;
             res.send(message);
@@ -829,17 +828,69 @@ db.once('open', function () {
     });
 
     //Update the users data (admin)
-    app.put('/user/:userId', (req,res) => {
-        User.findOne({userId: req.params['eventId']})
+    app.put('/user/:UserId', (req,res) => {
+        console.log(req.body);
+        User.findOne({UserId: req.params['UserId']})
         .populate(['Pinned', 'Comments'])
         .then((result) => {
             console.log(result);
-            
+            if (result === null){
+                const message = 'No user with such UserID is found';
+                res.status(404);
+                res.set('Content-Type', 'text/plain');
+                res.send(message);
+                return;
+            }                
+            console.log(User.Comments);
+            //console.log(User.Comments.length);
+            if(User.Comments === null || User.Comments === undefined){
+                let LastComments = 1;
+            }
+            else{
+                let LastComments = User.Comments[User.Comments.length - 1];
+            }
+            if(User.Pinned === null || User.Pinned === undefined ){
+                let LastPinned = 1;
+            }
+            else{
+                let LastPinned = User.Pinned[User.Pinned.length - 1];
+            }
+            result.Comments[LastComments] = req.body.Comments;
+            result.Pinned[LastPinned] =req.body.Pinned;
+            var resultJSON = {
+                "UserId": result.UserId,
+                "UserName": req.body.UserName,
+                "UserPwHash": req.body.UserPwHash,
+                "Admin": req.body.Admin,
+                "Comments": result.Comments,
+                "Pinned": result.Pinned
+            }
+            var text = JSON.stringify(resultJSON,null, " ");
+            res.status(200);
+            res.setHeader('Content-Type', 'text/plain');
+            res.send(text);
         });
 
     });
 
     //Delete the users data (admin)
+    app.delete('/user/:UserId', (req,res) =>{
+        User.deleteOne({UserId: req.params['UserId']})
+        .then((data) => {
+            if(data.deleteCount == 0){
+                res.status(404);
+                res.set('Content-Type','text/plain');
+                res.send('404 No such UserId');
+                return;
+            }
+            else{
+                res.status(204);
+                //res.set('Content-Type','text/plain');
+                //res.send('Status: 204 (Event deleted)');
+            }
+        })
+        .catch((error) => console.log(error));
+    });
 
 
     //Error handling
