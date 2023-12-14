@@ -1,5 +1,5 @@
-import React from 'react';
-
+import React,{useEffect} from 'react';
+import './UserPage.css';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -17,6 +17,7 @@ class UserPage extends React.Component {
     super(props);
     this.state = {
       data: null,
+     
 
     };
   }
@@ -53,6 +54,13 @@ class UserPage extends React.Component {
     
     
   }
+
+  // ListEvent = (e)=>{
+  //   e.preventDefault();
+  //   let priceE = document.getElementById("price").value;
+  //   <ShowEvent price = {priceE}/>
+   
+  // }
   
  
 
@@ -71,6 +79,7 @@ class UserPage extends React.Component {
         
         <button  className="btn btn-info m-2" onClick={()=>this.Sort(true)}>Sort in ascending order</button>
         <button  className="btn btn-info m-2" onClick={()=>this.Sort(false)}>Sort in descending order</button>
+        <button  className="btn btn-info m-2">Show favorite venue</button>
 
 
         <div>
@@ -94,6 +103,18 @@ class UserPage extends React.Component {
           </table>
 
         </div>
+       
+        {/* <form>
+          <div class="form-group">
+            <label for="price" style={{color:'white'}}>List events that price is under...</label>
+            <input class="form-control" id="price" placeholder="Enter price"/>
+          </div>
+          <button type="submit" class="btn btn-info mt-2" onClick={(e)=>{this.ListEvent(e)}}>List</button>
+       </form> */}
+
+       <ShowEvent/>
+
+
         
       </div>
       
@@ -109,6 +130,35 @@ class UserPage extends React.Component {
 }
 
 
+
+function ShowEvent(){
+  
+ const navigateE = useNavigate();
+ const ListEvent = (e)=>{
+    e.preventDefault();
+    let priceE = document.getElementById("price").value;
+    
+    navigateE(`/user/event?price=`+priceE);
+  }
+  
+  
+  return(
+    <form>
+          <div class="form-group">
+            <label for="price" style={{color:'white'}}>List events that price is under...</label>
+            <input class="form-control" id="price" placeholder="Enter price"/>
+          </div>
+          <button type="submit" class="btn btn-info mt-2" onClick={(e)=>{ListEvent(e)}}>List</button>
+    </form>
+  )
+    
+    
+    // useEffect(() => {
+    //   navigateE(`/event/`+props.price);
+    // }, []);
+    
+  
+}
 
 
 function LocationTable(props){

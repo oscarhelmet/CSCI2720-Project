@@ -67,7 +67,13 @@ function LocationDetail(){
 
                     <table className="table table-striped" style={{textAlign: 'center'}}>
                     <thead className="thead-dark">
-                    
+                    <tr>
+                      <th scope="col">EventID</th>
+                      <th scope="col">Event title</th>
+                      <th scope="col">Event date</th>
+                      <th scope="col">Presenter</th>
+                      <th scope="col">Price</th>
+                    </tr>
                     </thead>
                     <tbody>
                       
@@ -85,7 +91,7 @@ function LocationDetail(){
                       <textarea class="form-control" id="new-comment" rows="3"></textarea>
                     </div>
                 
-                    <button type="button" class="btn btn-primary" onclick="modifythisone!">Add comment</button>
+                    <button type="button" class="btn btn-primary" onClick="modifythisone!">Add comment</button>
           
                     </form>
 
@@ -113,17 +119,7 @@ class Event extends React.Component{
     // console.log(dataEve[0])
     let i = this.props.i;
     return(
-    <table class="table">
-      <thead class="thead-dark">
-        <tr>
-          <th scope="col">EventID</th>
-          <th scope="col">Event title</th>
-          <th scope="col">Event date</th>
-          <th scope="col">Presenter</th>
-          <th scope="col">Price</th>
-        </tr>
-      </thead>
-      <tbody>
+    
         <tr className='h6'>
           <th scope="row">{dataEve[i].eventID}</th>
           <td>{dataEve[i].title}</td>
@@ -132,8 +128,7 @@ class Event extends React.Component{
           <td>{dataEve[i].price}</td>
         </tr>
         
-      </tbody>
-    </table>
+      
     )
 
 
