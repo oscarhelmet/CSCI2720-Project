@@ -4,6 +4,7 @@ import LoginPage from './LoginPage';
 import AdminPage from './AdminPage';
 import UserPage from './UserPage';
 import LocationDetail from './LocationDetail';
+import EventPage from './EventPage';
 
 
 class App extends React.Component {
@@ -50,6 +51,7 @@ class App extends React.Component {
             <Route path="/admin" element={<AdminPage />} />   {/*This is for debugging only*/}
             <Route path="/user" element={<UserPage />} /> 
             <Route path='/user/:id' element={<LocationDetail/>}/>
+            <Route path='/user/event' element={<EventPage/>}/>
             
              
 
