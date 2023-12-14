@@ -622,7 +622,7 @@ db.once('open', function () {
         });
     });
     
-    //For Comments Data CRUD access
+    //--------------------------------For Comments Data CRUD access------------------------------------------------
     //Create the Comments Data 
     app.post('/comment', (req, res) => {
         Comment.findOne().sort({commentId: -1 }).then((result) => {
@@ -728,129 +728,74 @@ db.once('open', function () {
         })
     }); 
 
-    //For Pinned location Data CRUD access
+    //--------------------------For Pinned location Data CRUD access---------------------------
     //Create the Pinned location
     app.post('/pinned/:UserId', (req,res) =>{
         User.findOne({UserId: req.params['UserId']})
+        .populate('Pinned')
         .then((result) => {
-        console.log(result);
-        if(result === null){
-            res.status(406);
-            res.set('Content-Type', 'text/plain');
-            res.send('Status: 406 Pinned couldn\t create (an unknown issue occurs)');
-            return;
-        }
-        else{
-            let newcomment = new comment({
-                commentId: newcommentId,
-                content: req.body['content'],
-                User: req.body['User'],
-                location: req.body['location']
-            });
-            Comment.create(newcomment)
-            .then(() => {
-                res.status(201);
-                res.redirect('/comment/' + newcommentId);
-                //res.send('<a href="http://localhost:3000/comment/' + newcommentId + '" target="_blank">http://localhost:3000/comment/' + newcommentId + '</a>');
-            })
-        }
+            console.log(result);
+            if(result === null){
+                res.status(406);
+                res.set('Content-Type', 'text/plain');
+                res.send('Status: 406 Pinned couldn\t create (user not found)');
+                return;
+            }
+            else{
+                if(result.Pinned === null){
+                    result.Pinned[0] = req.params['Pinned']
+                    result.save();
+                }
+                else{
+                    console.log(result.Pinned.length);
+                }
+            }
+            res.status(201);
+            res.redirect('/pinned/' + newcommentId);
+            //res.send('<a href="http://localhost:3000/pinned/' + UserId + '" target="_blank">http://localhost:3000/pinned/' + UserId + '</a>');
         })
         .catch((error) => console.log(error))
     });
 
+    //Read the Pinned location????
+
+
+
     // For Users Data CRUD access for admin role
     //Create the users data (admin)
     app.post('/user', (req, res) => {
-
-        const UserId = req.body.UserId;
         const UserName = req.body.UserName;
         const UserPwHash = req.body.UserPwHash;
         const Admin = req.body.Admin;
         const Comments = req.body.Comments;
         const Pinned = req.body.Pinned;
-        Event.find({ eventID: { $eq: new_eventID } })
-                .then((s) => {
-                    let newEvent = new Event({
-                    eventID: new_eventID,
-                    title: new_title,
-                    venueID: new_venueID,
-                    date: new_date,
-                    description: new_description,
-                    price:new_price
-                    });
-                if (s.length>0) {  //event exist in db, just update it
-                    //console.log(s[0].venueID);
-                    //console.log();
-    
-                    
-    
-                    //update event
-                    Event.findOneAndUpdate({ eventID: { $eq: new_eventID } },
-                    {
-                        title: new_title,
-                        venueID: new_venueID,
-                        date: new_date,
-                        description: new_description,
-                        price:new_price
-                    },{new: true}).then((q)=>{
-                    console.log(q);
-                    //update event's venue in venue collection
-                    Venue.findOneAndUpdate({ venueID: { $eq: new_venueID } }, { $addToSet: { eventlist: s[0]._id } },{new: true})
-                    .then((p)=>{
-                    const message = `
-                        <p> Below is the event information you have updated </p>
-                        <p>eventID: ${new_eventID}</p>
-                        <p>title: ${new_title}</p>
-                        <p>venueID: ${new_venueID}</p>
-                        <p>venue: ${p.venue}</p>
-                        <p>venue latitude: ${p.latitude}</p>
-                        <p>venue longitude: ${p.longitude}</p>
-                        <p>date: ${new_date}</p>
-                        <p>description: ${new_description}</p>
-                        <p>price: ${new_price}</p>
-                    `;
-                        res.setHeader('Content-Type', 'text/plain');
-                        res.statusCode = 202;
-                        res.send(message);
-                    })
-                    console.log("a new event update successfully")
-                    
-                    }).catch((error) => {
-                    console.log(error);
-                    });
-                } else { 
-                    //Saving this new event to database
-                    newEvent
-                    .save()
-                    .then(() => {
-                    Venue.find({venueID: { $eq: new_venueID }})
-                    .then((p)=>{
-                        console.log("a new event created successfully");
-                    const message = `
-                        <p> Below is the event information you have created </p>
-                        <p>eventID: ${new_eventID}</p>
-                        <p>title: ${new_title}</p>
-                        <p>venueID: ${new_venueID}</p>
-                        <p>venue: ${p[0].venue}</p>
-                        <p>venue latitude: ${p[0].latitude}</p>
-                        <p>venue longitude: ${p[0].longitude}</p>
-                        <p>date: ${new_date}</p>
-                        <p>description: ${new_description}</p>
-                        <p>price: ${new_price}</p>
-                        <p>price: ${new_price}</p>
-                    `;
-                        res.setHeader('Content-Type', 'text/plain');
-                        res.statusCode = 201;
-                        res.send(message);
-                    })
-                    
-                    })
-                    .catch((error) => {
-                        console.log("failed to save new event");
-                    });
-                }
+        User.findOne().sort({UserId: -1 }).then((result) => {
+            console.log(result.UserId);
+            if(result === null){
+                res.status(406);
+                res.set('Content-Type', 'text-plain');
+                res.send('Status: 406 User couldn\'t create (an unknown issue occurs)');
+                return;
+            }
+            else{
+                let newUserId = result.UserId + 1;
+                let newUser = new User({
+                    UserId: newUserId,
+                    UserName: req.params['UserName'],
+                    UserPwHash: req.params['UserPwHash'],
+                    Admin: req.params['Admin'],
+                    Comments: null,
+                    Pinned: null
+                });
+                User.create(newUser)
+                .then(() => {
+                    res.status(201);
+                    //res.redirect('/user'+newUserId);
+                    res.send('<a href="http://localhost:3000/user/' + newUserId + '" target="_blank">http://localhost:3000/user/' + newUserId + '</a>');
                 })
                 .catch((error) => console.log(error));
+            }
+        });
     });
 
     //Read the users data (admin)
@@ -884,6 +829,15 @@ db.once('open', function () {
     });
 
     //Update the users data (admin)
+    app.put('/user/:userId', (req,res) => {
+        User.findOne({userId: req.params['eventId']})
+        .populate(['Pinned', 'Comments'])
+        .then((result) => {
+            console.log(result);
+            
+        });
+
+    });
 
     //Delete the users data (admin)
 
