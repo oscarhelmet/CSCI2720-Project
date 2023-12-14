@@ -26,7 +26,7 @@ class AdminPage extends React.Component {
     const CRUDComponent = currentEntity === 'Event' ? EventCRUD : UserCRUD;
     return (
 
-      <div className="container mt-5 bg-light rounded" id="main-cont">
+      <div className="container mt-5 bg-light rounded-5" id="main-cont">
         <div className="rowl">
           <br />
           <h4><b>Admin Dashboard</b></h4>

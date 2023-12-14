@@ -14,8 +14,7 @@ class LoginPage extends React.Component {
 
   handleLogin = (event) => {
     event.preventDefault();
-    // Here you would handle the login verification logic
-    // For now, simulate successful login
+
     this.props.history.push('/admin');
   }
 
