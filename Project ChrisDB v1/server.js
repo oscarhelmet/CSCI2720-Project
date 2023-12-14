@@ -532,24 +532,33 @@ db.once('open', function () {
 
   // Find events whose price under a specific number. (e.g., ≤500) http://localhost:3000/event?price=500
   app.get('/event', (req, res) => {
-    //console.log(req.query.price);
-    const Lowprice = parseInt(req.query.price);
-    Event.find({price: {$elemMatch: { $lte: Lowprice }}})
-      .then((p) => {
-        console.log(p.length);
-        var text = JSON.stringify(p, null, " ");
-        res.setHeader('Content-Type', 'text/plain');
-        res.send(text);
+    let query;
+  
+    if (req.query.price) {
+      const lowPrice = parseInt(req.query.price, 10);
+      if (!isNaN(lowPrice)) {
+        query = Event.find({ 
+          price: { $lte: lowPrice }
+        });
+      } else {
+        return res.status(400).send('Invalid price query parameter');
       }
-      )
+    } else {
+      query = Event.find({});
+    }
+  
+    query.then((events) => {
+        console.log(events.length);
+        res.json(events); // It's more conventional to send JSON for API responses
+      })
       .catch((error) => {
-         console.log(error)
+        console.error(error);
+        res.status(500).send(error.message);
       });
   });
-
 
 
 });
 
 
-const server = app.listen(3000);
+const server = app.listen(7000);

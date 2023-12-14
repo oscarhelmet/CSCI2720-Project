@@ -3,15 +3,18 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Modal from './Modal';
 import './CRUD.css';
 
+const port = 7000;
+
+
 class EventCRUD extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            eventName: '',
+            title: '',
             eventID: '',
-            eventVenue: '',
-            eventDescription: '',
-            eventPresenter: '',
+            venueID: '',
+            description: '',
+            presenter: '',
             price: '',
             showCreateModal: false,
             showReadModal: false,
@@ -19,25 +22,46 @@ class EventCRUD extends React.Component {
             showDeleteModal: false,
             selectedEventId: null,
             selectedEvent: null,
-
-            events: [ // Dummy event data
-                {
-                    eventID: '1',
-                    eventName: 'Tech Conference',
-                    eventVenue: 'V001',
-                    eventDescription: 'A conference on the latest in tech.',
-                    eventPresenter: 'John Doe',
-                    price: '99.99'
-                },
-                {
-                    eventID: '2',
-                    eventName: 'Art Workshop',
-                    eventVenue: 'V002',
-                    eventDescription: 'Hands-on sessions for aspiring artists.',
-                    eventPresenter: 'Jane Smith',
-                    price: '49.99'
-                }]
+            currentPage: 1,
+            eventsPerPage: 10,
+            animateChange: true,
+            venueName: null,
+            events: [],
         };
+
+        this.handleInputChange = this.handleInputChange.bind(this);
+    }
+
+    componentDidMount() {
+        this.fetchEvents();
+    }
+
+
+    fetchEvents = async () => {
+        try {
+            const response = await fetch(`http://localhost:${port}/event`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            this.setState({ events: data });
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    }
+
+
+    paginate = (pageNumber) => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
+        this.setState({ animateChange: false }, () => {
+            setTimeout(() => {
+                this.setState({ currentPage: pageNumber, animateChange: true });
+            }, 250);
+        });
     }
 
 
@@ -58,11 +82,11 @@ class EventCRUD extends React.Component {
                 newState = {
                     ...newState,
                     selectedEvent: event,
-                    eventName: event.eventName,
+                    title: event.title,
                     eventID: event.eventID,
-                    eventVenue: event.eventVenue,
-                    eventDescription: event.eventDescription,
-                    eventPresenter: event.eventPresenter,
+                    venueID: event.venueID,
+                    description: event.description,
+                    presenter: event.presenter,
                     price: event.price,
                 };
             }
@@ -71,11 +95,11 @@ class EventCRUD extends React.Component {
             newState = {
                 ...newState,
                 selectedEvent: null,
-                eventName: '',
+                title: '',
                 eventID: '',
-                eventVenue: '',
-                eventDescription: '',
-                eventPresenter: '',
+                venueID: '',
+                description: '',
+                presenter: '',
                 price: '',
             };
         }
@@ -87,7 +111,11 @@ class EventCRUD extends React.Component {
 
     handleInputChange = (event) => {
         const { name, value } = event.target;
-        this.setState({ [name]: value });
+        this.setState({ [name]: value }, () => {
+            if (name === 'venueID') {
+                this.fetchVenueData(value);
+            }
+        });
     }
 
     handleDeleteEvent = () => {
@@ -106,10 +134,10 @@ class EventCRUD extends React.Component {
     handleUpdateEvent = (event) => {
         event.preventDefault();
         const updatedEvent = {
-            eventName: this.state.eventName,
-            eventVenue: this.state.eventVenue,
-            eventDescription: this.state.eventDescription,
-            eventPresenter: this.state.eventPresenter,
+            title: this.state.title,
+            venueID: this.state.venueID,
+            description: this.state.description,
+            presenter: this.state.presenter,
             price: this.state.price,
         };
 
@@ -133,24 +161,55 @@ class EventCRUD extends React.Component {
     }
 
 
+    fetchVenueData = async(venueID) => {
+
+        const response = await fetch(`http://localhost:${port}/venue/${venueID}`, {    //please change the url
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+            // .then((response) => {
+            //     alert(response);
+            //     if (!response.ok) {
+            //         throw new Error('Network response was not ok');
+            //     }
+            //     return response.json();
+            // })
+            // .then((data) => {
+            //     this.setState({ venueName: data.venue || 'No location found'+response });
+            // })
+            .catch((error) => {
+                console.error('There has been a problem with your fetch operation:', error);
+                this.setState({ venueName: 'No location found' });
+            });
+        alert(response);
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.venueID !== this.state.venueID) {
+            this.fetchVenueData(this.state.venueID);
+        }
+    }
+
 
     // CRUD operations 
 
     handleCREATE = async (event) => {
         event.preventDefault();
-        const { eventName, eventID, eventVenue, eventDescription, eventPresenter, price } = this.state;
+        const { title, eventID, venueID, description, presenter, price } = this.state;
         const data = {
             eventID: eventID,
-            title: eventName,
-            venueID: eventVenue,
-            description: eventDescription,
-            presenter: eventPresenter,
+            title: title,
+            venueID: venueID,
+            description: description,
+            presenter: presenter,
             price: price,
         };
 
 
         try {
-            const response = await fetch('http://localhost:3000/???', {    //please change the url
+            const response = await fetch(`http://localhost:${port}/event/${eventID}`, {    //please change the url
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -176,7 +235,7 @@ class EventCRUD extends React.Component {
 
 
         try {
-            const response = await fetch('http://localhost:3000/???', {    //please change the url
+            const response = await fetch(`http://localhost:${port}/event/${eventID}`, {    //please change the url
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -191,25 +250,25 @@ class EventCRUD extends React.Component {
             }
         }
         catch (error) {
-            alert('Error creating event:', error);
+            alert('Error Reading event:', error);
         }
 
     }
 
     handleUPDATE = async (event) => {
         event.preventDefault();
-        const { eventName, eventVenue, eventDescription, eventPresenter, price } = this.state;
+        const { title, venueID, description, presenter, price } = this.state;
         const data = {
-            title: eventName,
-            venueID: eventVenue,
-            description: eventDescription,
-            presenter: eventPresenter,
+            title: title,
+            venueID: venueID,
+            description: description,
+            presenter: presenter,
             price: price,
         };
 
 
         try {
-            const response = await fetch('http://localhost:3000/???', {    //please change the url
+            const response = await fetch(`http://localhost:${port}/event/`, {    //please change the url
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -224,7 +283,7 @@ class EventCRUD extends React.Component {
             }
         }
         catch (error) {
-            alert('Error creating event:', error);
+            alert('Error Update event:', error);
         }
 
 
@@ -238,7 +297,7 @@ class EventCRUD extends React.Component {
 
 
         try {
-            const response = await fetch('http://localhost:3000/???', {    //please change the url
+            const response = await fetch(`http://localhost:${port}/event/${eventID}`, {    //please change the url
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
@@ -256,7 +315,7 @@ class EventCRUD extends React.Component {
             }
         }
         catch (error) {
-            alert('Error creating event:', error);
+            alert('Error Deleting event:', error);
         }
 
     }
@@ -265,8 +324,15 @@ class EventCRUD extends React.Component {
 
 
     render() {
-        const { showCreateModal, showReadModal, showUpdateModal, showDeleteModal, selectedEvent } = this.state;
-        const { events } = this.state;
+        const { showCreateModal, showReadModal, showUpdateModal, showDeleteModal, selectedEvent, currentPage, eventsPerPage, animateChange, events, venueName } = this.state;
+        const indexOfLastEvent = currentPage * eventsPerPage;
+        const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+        const currentEvents = animateChange ? events.slice(indexOfFirstEvent, indexOfLastEvent) : [];
+
+        const pageNumbers = [];
+        for (let i = 1; i <= Math.ceil(events.length / eventsPerPage); i++) {
+            pageNumbers.push(i);
+        }
 
         return (
 
@@ -284,18 +350,18 @@ class EventCRUD extends React.Component {
                 < Modal show={showCreateModal} handleClose={() => this.toggleModal('showCreateModal')}>
 
                     {/* Create Event */}
-                    <div className="container px-4 p-3 border bg-light rounded">
+                    <div className="container px-4 p-3 border bg-light rounded-5">
                         <h2>Create Event</h2>
                         <form onSubmit={this.state.handleCREATE}>
                             <fieldset>
                                 <div className="form-group">
-                                    <label htmlFor="eventName">Event Title:</label>
+                                    <label htmlFor="title">Event Title:</label>
                                     <input
                                         class="inputC"
                                         type="text"
-                                        id="eventName"
-                                        name="eventName"
-                                        value={this.state.eventName}
+                                        id="title"
+                                        name="title"
+                                        value={this.state.title}
                                         onChange={this.handleInputChange}
                                     />
                                 </div>
@@ -310,33 +376,33 @@ class EventCRUD extends React.Component {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="eventVenue">Venue:</label>
+                                    <label htmlFor="venueID">Venue:</label>
                                     <input class="inputC"
                                         type="number"
-                                        id="eventVenue"
-                                        name="eventVenue"
-                                        value={this.state.eventVenue}
+                                        id="venueID"
+                                        name="venueID"
+                                        value={this.state.venueID}
                                         onChange={this.handleInputChange}
                                     />
                                 </div>
                                 <div className='form-group'>
-                                    <label htmlFor="eventDescription">Description:</label>
+                                    <label htmlFor="description">Description:</label>
                                     <textarea
                                         class="inputT"
                                         type="text"
-                                        id="eventDescription"
-                                        name="eventDescription"
-                                        value={this.state.eventDescription}
+                                        id="description"
+                                        name="description"
+                                        value={this.state.description}
                                         onChange={this.handleInputChange}
                                     />
                                 </div>
                                 <div className='form-group'>
-                                    <label htmlFor="eventPresenter">Presenter:</label>
+                                    <label htmlFor="presenter">Presenter:</label>
                                     <input class="inputC"
                                         type="text"
-                                        id="eventPresenter"
-                                        name="eventPresenter"
-                                        value={this.state.eventPresenter}
+                                        id="presenter"
+                                        name="presenter"
+                                        value={this.state.presenter}
                                         onChange={this.handleInputChange}
                                     />
                                 </div>
@@ -364,7 +430,7 @@ class EventCRUD extends React.Component {
 
 
                 {/* readEvents */}
-                < div className="container px-4 p-3 border bg-light rounded" id="reader">
+                < div className="container px-4 p-3 border bg-light rounded-5" id="readbar">
                     <form id="check" onSubmit={this.handleREAD}>
                         <fieldset>
                             <div class="wrap-inputC validate-input">
@@ -392,105 +458,125 @@ class EventCRUD extends React.Component {
 
 
 
-                < div className="container p-0 border bg rounded" id="reader">
-                    <table className="table table-hover">
+                < div className="container p-0"  >
+                    <table className="table table-hover" id='reader'>
                         <thead>
-                            <tr className='table-info'>
+                            <tr className='table'>
                                 <th scope="col">ID</th>
                                 <th scope="col">Event Title</th>
-                                <th scope="col">Venue</th>
-                                <th scope="col">Description</th>
-                                <th scope="col">Presenter</th>
                                 <th scope="col">Price</th>
                                 <th scope="col">Actions</th>
-                                <th scope="col"><i class="bi bi-plus-circle h3" onClick={() => this.toggleModal('showCreateModal')
-                                } style={{ color: 'blue' }}></i></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {events.map(event => (
+                        <tbody className={this.state.animateChange ? 'fade-enter-active' : 'fade-exit'}>
+                            {currentEvents.map(event => (
                                 <tr key={event.eventID}>
                                     <td>{event.eventID}</td>
-                                    <td>{event.eventName}</td>
-                                    <td>{event.eventVenue}</td>
-                                    <td>{event.eventDescription}</td>
-                                    <td>{event.eventPresenter}</td>
-                                    <td>{event.price}</td>
+                                    <td>{event.title}</td>
+                                    <td>{event.price.join(', ')}</td>
                                     <td>
                                         <button onClick={() => this.toggleModal('showUpdateModal', event.eventID)} className="btn btn-outline-primary btn-circle btn-xl">
-                                            <i class="bi bi-pencil-square h5"></i>
+                                            <i class="bi bi-pencil-square"></i>
                                         </button>
-                                    </td>
-                                    <td>
                                         <button onClick={() => this.toggleModal('showDeleteModal', event.eventID)} className="btn btn-outline-danger btn-circle btn-xl">
-                                            <i class="bi bi-trash3-fill h5"></i>
+                                            <i class="bi bi-trash3-fill"></i>
                                         </button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
+
                     </table>
+                    <nav aria-label="Page navigation" id='pagenav'>
+                        <ul className="pagination">
+                            {pageNumbers.map(number => (
+                                <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                                    <a onClick={() => this.paginate(number)} className="page-link">
+                                        {number}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
                 </div >
 
 
                 <br />
 
                 <Modal show={this.state.showUpdateModal} handleClose={() => this.toggleModal('showUpdateModal')}>
-                    <div className="container px-4 py-3 border bg-light" id="updater">
+                    <div className="container px-4 py-3 border bg-light rounded-5" id="updater">
                         <form onSubmit={this.handleUpdateEvent}>
-                            <legend> Update Event</legend>
+                            <legend> Event Details</legend>
                             <fieldset>
-                                <div className="form-group">
-                                    <label htmlFor="eventName">Event Title:</label>
-                                    <input
-                                        class="inputC"
-                                        type="text"
-                                        id="eventName"
-                                        name="eventName"
-                                        value={this.state.eventName}
-                                        onChange={this.handleInputChange}
-                                    />
+                                <div className="form-group d-flex" style={{ alignItems: 'center', gap: '1rem' }}>
+                                    <fieldset disabled>
+                                        <div className="d-flex flex-column" style={{ flexBasis: 'auto', flexGrow: 0 }}>
+                                            <label htmlFor="eventID">ID:</label>
+                                            <input
+                                                className="inputC form-control"
+                                                type="number"
+                                                id="eventID"
+                                                name="eventID"
+                                                value={this.state.eventID}
+                                                onChange={this.handleInputChange}
+                                            />
+                                        </div>
+                                    </fieldset>
+                                    <div className="flex-grow-1 d-flex flex-column">
+                                        <label htmlFor="title">Event Title:</label>
+                                        <input
+                                            className="inputC form-control"
+                                            type="text"
+                                            id="title"
+                                            name="title"
+                                            value={this.state.title}
+                                            onChange={this.handleInputChange}
+                                        />
+                                    </div>
+
                                 </div>
-                                <fieldset disabled = 'true'>
-                                <div className="form-group">
-                                    <label htmlFor="eventID">ID:</label>
-                                    <input class="inputC"
-                                        type="number"
-                                        id="eventID"
-                                        name="eventID"
-                                        value={this.state.eventID}
-                                        onChange={this.handleInputChange}
-                                    />
-                                </div>
-                                </fieldset>
-                                <div className="form-group">
-                                    <label htmlFor="eventVenue">Venue:</label>
-                                    <input class="inputC"
-                                        type="number"
-                                        id="eventVenue"
-                                        name="eventVenue"
-                                        value={this.state.eventVenue}
-                                        onChange={this.handleInputChange}
-                                    />
+                                <div className="form-group d-flex" style={{ alignItems: 'center', gap: '1rem' }}>
+                                    <fieldset className="d-flex flex-column" style={{ flexBasis: 'auto', flexGrow: 0 }}>
+                                        <label htmlFor="venueID">Venue ID:</label>
+                                        <input
+                                            className="inputC form-control"
+                                            type="number"
+                                            id="venueID"
+                                            name="venueID"
+                                            value={this.state.venueID}
+                                            onChange={this.handleInputChange}
+                                        />
+                                    </fieldset>
+                                    <div className="flex-grow-1 d-flex flex-column">
+                                        <label htmlFor="venueName">Venue Name:</label>
+                                        <input
+                                            className="inputC form-control"
+                                            type="text"
+                                            id="venueName"
+                                            name="venueName"
+                                            value={this.state.venueName}
+                                            disabled={true}
+                                        />
+                                    </div>
                                 </div>
                                 <div className='form-group'>
-                                    <label htmlFor="eventDescription">Description:</label>
+                                    <label htmlFor="description">Description:</label>
                                     <textarea
                                         class="inputT"
                                         type="text"
-                                        id="eventDescription"
-                                        name="eventDescription"
-                                        value={this.state.eventDescription}
+                                        id="description"
+                                        name="description"
+                                        value={this.state.description}
                                         onChange={this.handleInputChange}
                                     />
                                 </div>
                                 <div className='form-group'>
-                                    <label htmlFor="eventPresenter">Presenter:</label>
+                                    <label htmlFor="presenter">Presenter:</label>
                                     <input class="inputC"
                                         type="text"
-                                        id="eventPresenter"
-                                        name="eventPresenter"
-                                        value={this.state.eventPresenter}
+                                        id="presenter"
+                                        name="presenter"
+                                        value={this.state.presenter}
                                         onChange={this.handleInputChange}
                                     />
                                 </div>
@@ -505,7 +591,13 @@ class EventCRUD extends React.Component {
                                     />
                                 </div>
                                 <br />
-                                <button type="submit" className="btn btn-outline-primary">Update Event</button>
+                                <div className="d-flex justify-content-between">
+                                    <button type="submit" className="btn btn-outline-primary rounded-pill">Update Event</button>
+
+                                    <button type="button" className="btn btn-danger rounded-pill ms-auto" onClick={this.handleDELETE}>
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </div>
                             </fieldset>
                         </form>
                     </div>
@@ -515,11 +607,12 @@ class EventCRUD extends React.Component {
 
 
                 <Modal show={showDeleteModal} handleClose={() => this.toggleModal('showDeleteModal')}>
-                    <div className="container px-4 py-3 border bg-light">
+                    <div className="container px-4 py-3 border bg-light rounded-5">
                         {selectedEvent && (
                             <div>
-                                <p>Are you sure you want to delete event ID {selectedEvent.eventID}: {selectedEvent.eventName}?</p>
-                                <button type="button" className="btn btn-danger" onClick={this.handleDeleteEvent}>
+                                <p><h3><b>ARE YOU SURE</b></h3><br />
+                                    you want to delete event ID {selectedEvent.eventID}: <br />{selectedEvent.title}?</p>
+                                <button type="button" className="btn btn-danger rounded-cicle" onClick={this.handleDELETE}>
                                     Delete
                                 </button>
                             </div>
