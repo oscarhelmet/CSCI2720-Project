@@ -1,4 +1,8 @@
 import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css'; 
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
+
 
 class UserCRUD extends React.Component {
     constructor(props) {
@@ -76,6 +80,7 @@ class UserCRUD extends React.Component {
         const data = {
             username: username,
             password: password,
+            
         };
 
 
@@ -134,7 +139,7 @@ class UserCRUD extends React.Component {
 
     render() {
         return (
-            <div className="container mt-5">
+            <div className="container mt-5" id='CRUD'>
 
 
                 <div className="container px-4 p-3 border bg-light">
@@ -162,7 +167,8 @@ class UserCRUD extends React.Component {
                                 onChange={this.handleInputChange}
                             />
                         </div>
-                        <button type="submit" className="btn btn-primary">Create User</button>
+                        <br/>
+                        <button type="submit" className="btn btn-primary"><i class="bi bi-person-plus-fill"></i></button>
                     </form>
                 </div>
 
@@ -182,7 +188,8 @@ class UserCRUD extends React.Component {
                                 onChange={this.handleInputChange}
                             />
                         </div>
-                        <button type="submit" className="btn btn-primary">Create User</button>
+                        <br/> 
+                        <button type="submit" className="btn btn-primary"><i class="bi bi-search"></i></button>
                     </form>
                 </div>
 
@@ -202,7 +209,8 @@ class UserCRUD extends React.Component {
                                 onChange={this.handleInputChange}
                             />
                         </div>
-                        <button type="submit" className="btn btn-primary">Create User</button>
+                        <br/>
+                        <button type="submit" className="btn btn-primary"><i class="bi bi-arrow-up-circle"></i></button>
                     </form>
                 </div>
 
@@ -222,7 +230,8 @@ class UserCRUD extends React.Component {
                                 onChange={this.handleInputChange}
                             />
                         </div>
-                        <button type="submit" className="btn btn-primary">Create User</button>
+                        <br/>
+                        <button type="submit" className="btn btn-primary"><i class="bi bi-trash3"></i></button>
                     </form>
                 </div>
 

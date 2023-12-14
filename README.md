@@ -8,7 +8,7 @@
 
 
    ## Client:
-        1. Packages: {React-app, React-dom, Bootstrap}
+        1. Packages: {React-app, React-dom, Bootstrap, bootstrap-icons}
         2. SPA: Login, User, Admin Pages 
 
 

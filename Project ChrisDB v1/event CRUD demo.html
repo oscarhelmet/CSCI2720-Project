@@ -45,7 +45,7 @@
       
       const eventID = document.getElementById('eventID').value;
       // use Get method to send a request to the server
-      const response = await fetch( 'http://localhost:3000/event/'+ eventID, { //put your server address here
+      const response = await fetch( 'http://localhost:7000/event/'+ eventID, { //put your server address here
         method: 'GET',
       }
       );
@@ -84,7 +84,7 @@
       };
 
       // use POST method to send a request to the server
-      const response = await fetch('http://localhost:3000/event' , { //put your server address here
+      const response = await fetch('http://localhost:7000/event' , { //put your server address here
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -109,7 +109,7 @@
       };
 
       // use DELETE method to send a request to the server
-      const response = await fetch('http://localhost:3000/event', { //put your server address here
+      const response = await fetch('http://localhost:7000/event', { //put your server address here
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
