@@ -241,7 +241,7 @@ class EventCRUD extends React.Component {
                 alert("Successfully Created");
             } else {
                 const errorMessage = await response.text();
-                alert(errorMessage || "An error occurred, please try again.");
+                alert(response.status + errorMessage || "An error occurred, please try again.");
             }
         } catch (error) {
             console.error('Error creating event:', error.message);
@@ -304,7 +304,7 @@ class EventCRUD extends React.Component {
             }
         }
         catch (error) {
-            alert('Error creating event:', error);
+            alert('Error:', error);
         }
     }
 
