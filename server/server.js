@@ -429,8 +429,28 @@ db.once('open', function () {
         .catch(err => console.log('Caught:', err.message));
     });
 
-    //////////////////////////////////////////////////////CRUD Event///////////////////////////////////////////////////
+  // Find venue whose name which contain keywords in the name. (e.g., Hong) http://localhost:8000/query/venue/?keywords=Hong
+  app.get('/query/venue/', (req, res) => {
+    
+    const keyword =  req.query.keywords;
+    console.log(keyword);
+    Venue.find({venue: {$regex: keyword, $options: "i" } })
+    .populate("eventlist")
+    .then((p) => {
+        //console.log(p.length);
+        var text = JSON.stringify(p, ['venueID', 'venue', 'latitude', 'longitude', 'eventlist','eventID','title',
+        'description','presenter','price'], " ");
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(text);
+      }
+      )
+      .catch((error) => {
+         console.log(error)
+      });
+  });
 
+    //////////////////////////////////////////////////////CRUD Event///////////////////////////////////////////////////
+    
     //get event by eventID, e.g. http://localhost:3000/event/154936
     app.get('/event/:eventID', (req, res) => {
         Event.find({ eventID: { $eq: req.params.eventID}})
@@ -1008,14 +1028,7 @@ db.once('open', function () {
         .catch((error) => console.log(error));
     });
 
-
-    //Error handling
-    app.all('/', (req, res) => {
-        // send this to client
-        res.send('Backend Connected');
-    });
-
 })
 
 // listen to port 3000
-const server = app.listen(3000);
+const server = app.listen(8000);
