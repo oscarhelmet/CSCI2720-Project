@@ -61,22 +61,25 @@ class UserPage extends React.Component {
   //   <ShowEvent price = {priceE}/>
    
   // }
-  
+ 
  
 
   render(){
+
     if(!this.state.data){
       return <div>Loading...</div>
     }
     venueInformation = this.state.data;
-
     
       return( 
-
-
-
-      <div className='mt-5'>
+      
+      <div className='mt-5' id='hi'>
         
+        <gmp-map id='map' style={{height:'500px'}} center='22.364641362732247, 114.17086003123094'  zoom="11" map-id="DEMO_MAP_ID">
+          {venueInformation.map((file,index)=> <GoogleMap i={index} key={index} />)} 
+              
+        </gmp-map>
+
         <button  className="btn btn-info m-2" onClick={()=>this.Sort(true)}>Sort in ascending order</button>
         <button  className="btn btn-info m-2" onClick={()=>this.Sort(false)}>Sort in descending order</button>
         <button  className="btn btn-info m-2">Show favorite venue</button>
@@ -124,6 +127,85 @@ class UserPage extends React.Component {
   
 }
 
+function GoogleMap(props){
+  let i = props.i;
+  let location = `${venueInformation[i].latitude},${venueInformation[i].longitude}`;
+  const navigate = useNavigate();
+  
+  
+  const handleClick = () => {
+    navigate(`/user/`+venueInformation[i].venueID);
+  };
+  return(
+
+    <gmp-advanced-marker position={location}title="My location" >
+    </gmp-advanced-marker>
+
+  )
+  // const m = document.querySelector('gmp-advanced-marker');
+  // console.log(m)
+
+  // const map = new google.maps.Map(document.getElementById("map"), {
+  //   center: { lat: 37.42, lng: -122.1 },
+  //   zoom: 14,
+  //   mapId: "4504f8b37365c3d0",
+  // });
+  // const priceTag = document.createElement("div");
+
+  // priceTag.className = "price-tag";
+  // priceTag.textContent = "$2.5M";
+
+  // const markerView = new google.maps.marker.AdvancedMarkerView({
+  //   map,
+  //   position: { lat: 37.42, lng: -122.1 },
+  //   content: priceTag,
+  // });
+
+  
+  // return(
+  // <div id='map'>
+  //   <Helmet>
+  //         <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAFo79INiYAHvallrV5ItA-AcucJh9E_RE&callback=console.debug&libraries=maps,marker&v=beta"></script>
+  //     </Helmet>
+    
+
+
+
+
+  // </div>
+    
+  
+
+  //   // <gmp-map style={{height:'500px'}} center='22.364641362732247, 114.17086003123094'  zoom="10" map-id="DEMO_MAP_ID">
+  //   //   {/* <gmp-advanced-marker position='22.364641362732247, 114.17086003123094' title="My location">
+  //   //   </gmp-advanced-marker> */}
+
+  //   //   {venueInformation.map((file,index)=> <GoogleMap i={index} key={index} />)} 
+      
+  //   // </gmp-map>
+
+  //     // <gmp-advanced-marker position={location} title="My location" >
+  //     // </gmp-advanced-marker>
+
+      
+
+  // )
+
+}
+
+
+// class GoogleMap extends React.Component{
+//   render(){
+//     let location = `${this.props.latitude},${this.props.longitude}`;
+//       return(
+//         <gmp-map style={{height:'500px'}} center={location}  zoom="15" map-id="DEMO_MAP_ID">
+//           <gmp-advanced-marker position={location} title="My location">
+//           </gmp-advanced-marker>
+//         </gmp-map>
+//       )
+//   }
+// }
+
 function ShowLocationWithName(){
 
     const navigateEN = useNavigate();
@@ -135,11 +217,11 @@ function ShowLocationWithName(){
     }
     return(
       <form>
-            <div class="form-group">
+            <div className="form-group">
               <label for="keyword" style={{color:'white'}}>List venus that contain this keyword...</label>
-              <input class="form-control" id="keyword" placeholder="Enter keyword"/>
+              <input className="form-control" id="keyword" placeholder="Enter keyword"/>
             </div>
-            <button type="submit" class="btn btn-info mt-2" onClick={(e)=>{ListLocation(e)}}>List</button>
+            <button type="submit" className="btn btn-info mt-2" onClick={(e)=>{ListLocation(e)}}>List</button>
       </form>
     )
 }
