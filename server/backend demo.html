@@ -53,6 +53,7 @@
     <p>Logout</p>
     <input type="button" value="logout" id="logout">
   </form>
+
   <form id="getUserForm">
     <p>User Information</p>
     <label for="UserId">UserId:</label>
@@ -61,6 +62,34 @@
     <input type="button" value="getUser" id="getUser">
   </form>
   <div id="userdata"></div>
+
+  <form id="editUserForm">
+    <p>Update User Information</p>
+    <label for="UserId2">UserId:</label>
+    <input type="text" id="UserId2" name="UserId2">
+    <br>
+    <label for="name2">UserName:</label>
+    <input type="text" id="name2" name="name2">
+    <br>
+    <label for="pw2">Password:</label>
+    <input type="text" id="pw2" name="pw2">
+    <br>
+    <label type="admin2">Admin Right:</label>
+    <p>True</p>
+    <input type="radio" id="admin2" name="admin2" value="true">
+    <p>False</p>
+    <input type="radio" id="admin2" name="admin2" value="false">
+    <br>
+    <label type="comment2"> Comment:</label>
+    <input type="text" id="comment2" name="comment2">
+    <br>
+    <label type="pinned2"> Pinned:</label>
+    <input type="text" id="pinned2" name="pinned2">
+    <br>
+    <input type="button" value="updateuser" id="updateuser">
+    <input type="button" value="createuser" id="createuser">
+  </form>
+
 
   <script>
     // prepare the data in JSON format
@@ -189,6 +218,60 @@
         method: 'GET'
       });
       console.log("getUser");
+      const resultMessage = await response.text();
+      console.log(resultMessage);
+    });
+
+    document.getElementById('updateuser').addEventListener('click', async (event) => {
+      const UserId = document.getElementById('UserId2').value;
+      const UserName = document.getElementById('name2').value;
+      const UserPwHash = document.getElementById('pw2').value;
+      const Admin = document.getElementById('admin2').value;
+      const Comments = document.getElementById('comment2').value;
+      const Pinned = document.getElementById('pinned2').value;
+      const data = {
+        UserId: UserId,
+        UserName: UserName,
+        UserPwHash: UserPwHash,
+        Admin: Admin,
+        Comments: Comments,
+        Pinned: Pinned
+      };
+      console.log(data);
+      const response = await fetch('http://localhost:3000/user/' + UserId , { //put your server address here
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+        mode: "cors"
+      });
+      console.log("Update User");
+      const resultMessage = await response.text();
+      console.log(resultMessage);
+    });
+    
+    document.getElementById('createuser').addEventListener('click', async (event) => {
+      const UserName = document.getElementById('name2').value;
+      const UserPwHash = document.getElementById('pw2').value;
+      const Admin = document.getElementById('admin2').value;
+      const data = {
+        UserName: UserName,
+        UserPwHash: UserPwHash,
+        Admin: Admin,
+        Comments: "",
+        Pinned: ""
+      };
+      console.log(data);
+      const response = await fetch('http://localhost:3000/user/', { //put your server address here
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+        mode: "cors"
+      });
+      console.log("Create User");
       const resultMessage = await response.text();
       console.log(resultMessage);
     });
