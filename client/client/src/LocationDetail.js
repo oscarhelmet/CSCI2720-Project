@@ -9,7 +9,7 @@ import './LocationDetail.css';
 
 let dataEve;
 
-function LocationDetail(){
+function LocationDetail(props){
  
 
   const [dataL, setData] = useState(null);
@@ -41,6 +41,26 @@ function LocationDetail(){
     navigate("/user");
   
   }
+
+
+  const addComment= function(){
+    const comment = {
+      content: document.getElementById('new-comment').value,
+      User: props.userID,
+      location: dataL[0].venueID
+    }
+    
+    fetch('http://localhost:8000/comment',{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(comment)
+    })
+      
+    console.log(comment);
+   
+  }
  
   if(!dataL){
     return<div>loading...</div>
@@ -55,6 +75,7 @@ function LocationDetail(){
       
       <div className='mt-5'>
         <button  className="btn btn-info m-2" onClick={()=>back()}>Back</button>
+        <button  className="btn btn-info m-2" onClick={()=>back()}>Add to My favorite</button>
         <GoogleMap latitude={dataL[0].latitude} longitude={dataL[0].longitude}/>
         <div className='ContentVenue'>
             <div>
@@ -91,11 +112,11 @@ function LocationDetail(){
                       <textarea class="form-control" id="new-comment" rows="3"></textarea>
                     </div>
                 
-                    <button type="button" class="btn btn-primary" onClick="modifythisone!">Add comment</button>
+                    <button type="button" class="btn btn-primary" onClick={()=>{addComment()}}>Add comment</button>
           
                     </form>
 
-                    <Comment/>
+                    <Comment locationId= {dataL[0].venueID}/>
               </div>
           </div>
         </div>
@@ -108,7 +129,18 @@ function LocationDetail(){
 }
 class Comment extends React.Component{
     render(){
-      return (<div>Comment here...</div>)
+      return (
+      
+      <div>
+        <div>User: {}</div>
+        <div>Content: 
+            <div>
+                {}  
+            </div>  
+        </div>
+      </div>
+      
+      )
       
     }
 }
