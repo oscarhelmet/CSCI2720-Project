@@ -17,7 +17,7 @@ class UserPage extends React.Component {
     super(props);
     this.state = {
       data: null,
-     
+      userID: this.props.userID
 
     };
   }
