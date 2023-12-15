@@ -1,0 +1,10 @@
+.ContentVenue{
+    margin: 5px;
+    background-color: rgb(17, 39, 71);
+    font-size: x-large;
+    padding: 10px;
+    font-weight: bolder;
+    color: rgb(255, 255, 255);
+    font-family: 'Courier New', Courier, monospace;
+    border-radius: 10px;
+}

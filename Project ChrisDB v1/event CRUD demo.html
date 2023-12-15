@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Post Form</title>
+</head>
+<body>
+  <p>Search Event Information</p>
+  <form id="searchForm">
+    <label for="eventID">Event ID:</label>
+    <input type="number" id="eventID" name="eventID">
+    <br>
+    <input type="submit" value="search">
+  </form>
+  <pre id="search_result"></pre>
+  
+  <form id="editForm" style="display: none">
+    <p>Update Event Information</p>
+    <label for="neweventID">eventID:</label>
+    <input type="number" id="neweventID" name="neweventID">
+    <br>
+    <label for="newtitle">title:</label>
+    <input type="text" id="newtitle" name="newtitle">
+    <br>
+    <label for="newvenueID">venueID:</label>
+    <input type="number" id="newvenueID" name="newvenueID">
+    <br>
+    <label for="newdate">date:</label>
+    <input type="text" id="newdate" name="newdate">
+    <br>
+    <label for="newdescription">description:</label>
+    <input type="text" id="newdescription" name="newdescription">
+    <br>
+    <label for="newprice">price:</label>
+    <input type="text" id="newprice" name="newprice">
+    <br>
+    <input type="submit" value="Update" id="update">
+    <input type="button" value="Delete" id="delete">
+  </form>
+  <div id="result"></div>
+  <script>
+    // prepare the data in JSON format
+    document.getElementById('searchForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      
+      const eventID = document.getElementById('eventID').value;
+      // use Get method to send a request to the server
+      const response = await fetch( 'http://localhost:7000/event/'+ eventID, { //put your server address here
+        method: 'GET',
+      }
+      );
+      console.log(response);
+      result=await response.text();
+      document.getElementById('result').innerHTML="";
+      document.getElementById('search_result').innerHTML= result;
+      document.getElementById('editForm').style.display="block";
+      var resultjson=JSON.parse(result);
+      console.log(resultjson);
+      document.getElementById('neweventID').value= resultjson.eventID;
+      document.getElementById('newtitle').value= resultjson.title;
+      document.getElementById('newvenueID').value= resultjson.venueID;
+      document.getElementById('newdate').value= resultjson.date;
+      document.getElementById('newdescription').value= resultjson.description;
+      document.getElementById('newprice').value= resultjson.price;
+    })
+
+
+    document.getElementById('editForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const new_eventID= document.getElementById('neweventID').value;
+      const new_title = document.getElementById('newtitle').value;
+      const new_venueID = document.getElementById('newvenueID').value;
+      const new_date = document.getElementById('newdate').value;
+      const new_description = document.getElementById('newdescription').value;
+      const new_price =  document.getElementById('newprice').value;
+      
+      const data = {
+        eventID: new_eventID,
+        title: new_title,
+        venueID: new_venueID,
+        date: new_date,
+        description: new_description,
+        price:new_price
+      };
+
+      // use POST method to send a request to the server
+      const response = await fetch('http://localhost:7000/event' , { //put your server address here
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      // render a new page if a response is received
+      const resultMessage = await response.text();
+      document.getElementById('result').innerHTML= resultMessage;
+      document.getElementById("searchForm").reset();
+      document.getElementById('search_result').innerHTML="";
+      document.getElementById('editForm').style.display="none";
+      document.getElementById("editForm").reset();
+    });
+
+    document.getElementById('delete').addEventListener('click', async (event) => {
+      event.preventDefault();
+      const eventID = document.getElementById('neweventID').value;
+      const data = {
+        eventID: eventID,
+      };
+
+      // use DELETE method to send a request to the server
+      const response = await fetch('http://localhost:7000/event', { //put your server address here
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      // render a new page if a response is received
+      const resultMessage = await response.text();
+      document.getElementById('result').innerHTML= resultMessage;
+      document.getElementById("searchForm").reset();
+      document.getElementById('search_result').innerHTML="";
+      document.getElementById('editForm').style.display="none";
+      document.getElementById("editForm").reset();
+    });
+  </script>
+</body>
+</html>
