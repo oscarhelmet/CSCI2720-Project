@@ -5,6 +5,7 @@ import AdminPage from './AdminPage';
 import UserPage from './UserPage';
 import LocationDetail from './LocationDetail';
 import EventPage from './EventPage';
+import SearchLocation from'./SearchLocation';
 import 'bootstrap/dist/css/bootstrap.min.css'; 
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -56,6 +57,8 @@ class App extends React.Component {
             <Route path="/user" element={<UserPage />} /> 
             <Route path='/user/:id' element={<LocationDetail/>}/>
             <Route path='/user/event' element={<EventPage/>}/>
+            <Route path='/user/location' element={<SearchLocation/>}/>
+            
             
              
 
