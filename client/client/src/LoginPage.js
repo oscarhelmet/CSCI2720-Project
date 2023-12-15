@@ -14,7 +14,6 @@ class LoginPage extends React.Component {
 
   handleLogin = (event) => {
     event.preventDefault();
-
     this.props.history.push('/admin');
   }
 

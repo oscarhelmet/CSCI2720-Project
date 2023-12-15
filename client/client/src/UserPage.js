@@ -103,16 +103,11 @@ class UserPage extends React.Component {
           </table>
 
         </div>
-       
-        {/* <form>
-          <div class="form-group">
-            <label for="price" style={{color:'white'}}>List events that price is under...</label>
-            <input class="form-control" id="price" placeholder="Enter price"/>
-          </div>
-          <button type="submit" class="btn btn-info mt-2" onClick={(e)=>{this.ListEvent(e)}}>List</button>
-       </form> */}
+   
 
        <ShowEvent/>
+       <ShowLocationWithName/>
+
 
 
         
@@ -127,6 +122,26 @@ class UserPage extends React.Component {
     
   
   
+}
+
+function ShowLocationWithName(){
+
+    const navigateEN = useNavigate();
+    const ListLocation =(e)=>{
+      e.preventDefault();
+      let keyword = document.getElementById("keyword").value;
+      console.log("hihihih");
+      navigateEN(`/user/location?keyword=`+keyword);
+    }
+    return(
+      <form>
+            <div class="form-group">
+              <label for="keyword" style={{color:'white'}}>List venus that contain this keyword...</label>
+              <input class="form-control" id="keyword" placeholder="Enter keyword"/>
+            </div>
+            <button type="submit" class="btn btn-info mt-2" onClick={(e)=>{ListLocation(e)}}>List</button>
+      </form>
+    )
 }
 
 
