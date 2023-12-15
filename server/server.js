@@ -692,6 +692,7 @@ db.once('open', function () {
     //Read the Comments Data by ID
     app.get('/comment/:commentId', (req,res) => {
         Comment.findOne({commentId: req.params['commentId']})
+        .populate(['User','location'])
         .then((data) => {
             console.log(data);
             if(data===null){
@@ -707,8 +708,8 @@ db.once('open', function () {
                     '{\n' +
                         '"commentId": ' + data.commentId + ',\n' +
                         '"content": "' + data.content + '",\n' +
-                        '"User": ' + data.User + ',\n' +
-                        '"location": "' + data.location + '"\n' +
+                        '"User": ' + data.User.UserId + ',\n' +
+                        '"location": "' + data.location.venueID + '"\n' +
                     '}' 
                 );
                 return;
