@@ -203,7 +203,7 @@
       };
 
       // use POST method to send a request to the server
-      const response = await fetch('http://localhost:3000/login' , { //put your server address here
+      const response = await fetch('http://localhost:8000/login' , { //put your server address here
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -229,7 +229,7 @@
     document.getElementById('getUser').addEventListener('click', async (event) => {
       const UserId = document.getElementById('UserId').value;
       // use GET method to send a request to the server
-      const response = await fetch('http://localhost:3000/user/' + UserId , { //put your server address here
+      const response = await fetch('http://localhost:8000/user/' + UserId , { //put your server address here
         method: 'GET'
       });
       console.log("getUser");
@@ -253,7 +253,7 @@
         Pinned: Pinned
       };
       console.log(data);
-      const response = await fetch('http://localhost:3000/user/' + UserId , { //put your server address here
+      const response = await fetch('http://localhost:8000/user/' + UserId , { //put your server address here
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -278,7 +278,7 @@
         Pinned: ""
       };
       console.log(data);
-      const response = await fetch('http://localhost:3000/user/', { //put your server address here
+      const response = await fetch('http://localhost:8000/user/', { //put your server address here
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
