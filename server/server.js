@@ -626,6 +626,19 @@ db.once('open', function () {
     app.get('/event', (req, res) => {
     //console.log(req.query.price);
     const Lowprice = parseInt(req.query.price);
+    if (req.query.price ==null){
+        Event.find({})
+        .then((p) => {
+        console.log(p.length);
+        var text = JSON.stringify(p, null, " ");
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(text);
+        }
+        )
+        .catch((error) => {
+            console.log(error)
+        });
+    }
     Event.find({price: {$elemMatch: { $lte: Lowprice }}})
         .then((p) => {
         console.log(p.length);
@@ -823,6 +836,7 @@ db.once('open', function () {
         const UserName = req.body.UserName;
         const UserPwHash = req.body.UserPwHash;
         const Admin = req.body.Admin;
+        console.log(UserName,UserPwHash,Admin);
         const Comments = null;// append in later Comments CRUD
         const Pinned = null;//append in later Pinned CRUD
         User.findOne().sort({UserId: -1 })
