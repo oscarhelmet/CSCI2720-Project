@@ -604,19 +604,21 @@ db.once('open', function () {
 
     // Find events whose price under a specific number. (e.g., ≤500) http://localhost:3000/event?price=500
     app.get('/event', (req, res) => {
-    //console.log(req.query.price);
-    const Lowprice = parseInt(req.query.price);
-    Event.find({price: {$elemMatch: { $lte: Lowprice }}})
-        .then((p) => {
-        console.log(p.length);
-        var text = JSON.stringify(p, null, " ");
-        res.setHeader('Content-Type', 'text/plain');
-        res.send(text);
+        //console.log(req.query.price);
+        const Lowprice = parseInt(req.query.price);
+        if (req.query.price ==null){
+            Event.find({})
+            .then((p) => {
+            console.log(p.length);
+            var text = JSON.stringify(p, null, " ");
+            res.setHeader('Content-Type', 'text/plain');
+            res.send(text);
+            }
+            )
+            .catch((error) => {
+                console.log(error)
+            });
         }
-        )
-        .catch((error) => {
-            console.log(error)
-        });
     });
     // Find venue whose name which contain keywords in the name. (e.g., Hong) http://localhost:8000/query/venue/?keywords=Hong
     app.get('/query/venue/', (req, res) => {
@@ -803,6 +805,7 @@ db.once('open', function () {
         const UserName = req.body.UserName;
         const UserPwHash = req.body.UserPwHash;
         const Admin = req.body.Admin;
+        console.log(UserName,UserPwHash,Admin);
         const Comments = null;// append in later Comments CRUD
         const Pinned = null;//append in later Pinned CRUD
         User.findOne().sort({UserId: -1 })
