@@ -429,28 +429,8 @@ db.once('open', function () {
         .catch(err => console.log('Caught:', err.message));
     });
 
-  // Find venue whose name which contain keywords in the name. (e.g., Hong) http://localhost:8000/query/venue/?keywords=Hong
-  app.get('/query/venue/', (req, res) => {
-    
-    const keyword =  req.query.keywords;
-    console.log(keyword);
-    Venue.find({venue: {$regex: keyword, $options: "i" } })
-    .populate("eventlist")
-    .then((p) => {
-        //console.log(p.length);
-        var text = JSON.stringify(p, ['venueID', 'venue', 'latitude', 'longitude', 'eventlist','eventID','title',
-        'description','presenter','price'], " ");
-        res.setHeader('Content-Type', 'text/plain');
-        res.send(text);
-      }
-      )
-      .catch((error) => {
-         console.log(error)
-      });
-  });
-
     //////////////////////////////////////////////////////CRUD Event///////////////////////////////////////////////////
-    
+
     //get event by eventID, e.g. http://localhost:3000/event/154936
     app.get('/event/:eventID', (req, res) => {
         Event.find({ eventID: { $eq: req.params.eventID}})
@@ -646,10 +626,6 @@ db.once('open', function () {
         res.setHeader('Content-Type', 'text/plain');
         res.send(text);
         }
-        )
-        .catch((error) => {
-            console.log(error)
-        });
     });
     // Find venue whose name which contain keywords in the name. (e.g., Hong) http://localhost:8000/query/venue/?keywords=Hong
     app.get('/query/venue/', (req, res) => {
@@ -949,83 +925,33 @@ db.once('open', function () {
 
     //Update the users data (admin)
     app.put('/user/:UserId', (req,res) => {
+        const UserName = req.body.UserName;
+        const UserPwHash = req.body.UserPwHash;
+        const Admin = req.body.Admin;
+        const Comments = req.body.Comments;
+        const Pinned =req.body.Pinned;
         console.log(req.body);
-        User.findOneAndUpdate({UserId: req.params['UserId']})
-        .populate(['Pinned', 'Comments'])
-        .then((result) => {
-            console.log(result);
+        console.log(Comments);
+        console.log(Pinned);
+        
+        User.findOneAndUpdate({UserId: {$eq: req.body.UserId}},    
+        {
+            UserName: UserName,
+            UserPwHash: UserPwHash,
+            Admin: Admin,
+        },{new:true},).then((result) => {
+            console.log(result);             
             if (result === null){
                 const message = 'No user with such UserID is found';
                 res.status(404);
                 res.set('Content-Type', 'text/plain');
                 res.send(message);
                 return;
-            }                
-            //console.log(User.Comments);
-            Comment.find({ User: { $eq: result._id}})
-            .then((q) => {
-                console.log(q);
-                Venue.find({ User: {$eq: result._id}})
-                .then((r) => {
-                    let buffer = '[';
-                    let buffer2 = '[';
-                    console.log(r);
-                    if(q === undefined){
-                        result.Comments = [];
-                    }
-                    else{
-                        //to refresh data linker
-                        //q.push(req.body.Comments);
-                        result.Comments = q;
-                    }
-                    if(r === undefined){
-                        result.Pinned = [];
-                    }
-                    else{
-                        //to refresh data linker
-                        //r.push(req.body.Pinned);
-                        result.Pinned = r;
-                    }
-                    
-                    result.UserPwHash = req.body.UserPwHash;
-                    result.Admin = req.body.Admin;
-                    //check the refreshed data
-                    console.log(result.Comments);
-                    console.log(result.Pinned);
-                    let LastEvent = q[q.length - 1];
-                    for (let one of q){
-                        buffer += 
-                        '"_id":{"$oid":' + one._id.oid+
-                        ((one != LastEvent) ? '},' : '}');
-                    }
-                    buffer += ']';
-                    let LastEvent2 = r[r.length - 1];
-                    for (let one of r){
-                        buffer2 += 
-                        '"_id":{"$oid":' + one._id.oid+
-                        ((one != LastEvent2) ? '},' : '}');
-                    }
-                    buffer2 += ']';
-                    console.log("finished");
-                    console.log(buffer);
-                    console.log(buffer2);
-                    
-                    var resultJSON = {
-                        "UserId": result.UserId,
-                        "UserName": req.body.UserName,
-                        "UserPwHash": req.body.UserPwHash,
-                        "Admin": req.body.Admin,
-                        "Comments": result.Comments,
-                        "Pinned": result.Pinned
-                    }
-                    var text = JSON.stringify(resultJSON,null, " ");
-                    res.status(200);
-                    res.setHeader('Content-Type', 'text/plain');
-                    res.send(text);
-                });
-            });
-        });
-
+            }    
+          
+            res.status(200);
+            res.setHeader('Content-Type', 'text/plain');
+            res.send(text);
     });
 
     //Delete the users data (admin)
@@ -1050,4 +976,4 @@ db.once('open', function () {
 })
 
 // listen to port 3000
-const server = app.listen(8000);
+const server = app.listen(3000);
