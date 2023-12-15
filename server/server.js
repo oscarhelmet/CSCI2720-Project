@@ -36,8 +36,8 @@ const UserSchema = mongoose.Schema({
 const CommentSchema = mongoose.Schema({
     commentId: {type: Number, required: [true, "Comment ID is required"], unique: true },
     content: {type: String, required: true },
-    User: {type: mongoose.Schema.Types.ObjectId, required: true },
-    location: {type: mongoose.Schema.Types.ObjectId, required: true}
+    User: {type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User'},
+    location: {type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Venue'}
 },{
     versionKey: false
 });
@@ -60,7 +60,7 @@ venue: {type: String, required: true,},
 latitude: {type: Number,required: true,},
 longitude: {type: Number,required: true,},
 eventlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event'}],
-comment: [{ type: String}]
+comment: [{ type: String, ref: 'Comment'}]
 },{
     versionKey: false
 });
@@ -170,24 +170,21 @@ https.get(eventsURL, (response) => {
 
         var price;  //progress some special case
         if (/[0-9]/.test(eventsJSON[i].pricee[0])) {  
-            if(/[(-)]/.test(eventsJSON[i].pricee[0])){  //data contain (03/05/2024) $420;$340;$260;$180;$50; (04/05/2024) $420;$340;$260;$180"
-            const regex = /\$(\d+)/g;
-            price = eventsJSON[i].pricee[0].match(regex).map(match => {
-                const numberString = match.substring(1);
-                return parseFloat(numberString);
-            });
+          if(/\)/.test(eventsJSON[i].pricee[0])){  //data contain (03/05/2024) $420;$340;$260;$180;$50; (04/05/2024) $420;$340;$260;$180"
+            price = "string place holder such that this event will not be saved";
             //console.log(eventsJSON[i].$.id);
             //console.log(price);
-            }else{
+          }else{
             price = parseFloat(eventsJSON[i].pricee[0].match(/\d+/g));
             //console.log(eventsJSON[i].$.id);
             //console.log(price);
-            }
+          }
         } else if(/free/i.test(eventsJSON[i].pricee[0])){ // the price data is string only
         price = [0];
         }else{
-            price = "string place holder such that this event will not be saved";
+          price = "string place holder such that this event will not be saved";
         }
+
         //console.log(price);
         let newEvent = new Event({
             eventID: eventsJSON[i].$.id,
@@ -621,46 +618,78 @@ db.once('open', function () {
             console.log(error)
         });
     });
+    // Find venue whose name which contain keywords in the name. (e.g., Hong) http://localhost:8000/query/venue/?keywords=Hong
+    app.get('/query/venue/', (req, res) => {
+        
+        const keyword =  req.query.keywords;
+        console.log(keyword);
+        Venue.find({venue: {$regex: keyword, $options: "i" } })
+        .populate("eventlist")
+        .then((p) => {
+            //console.log(p.length);
+            var text = JSON.stringify(p, ['venueID', 'venue', 'latitude', 'longitude', 'eventlist','eventID','title',
+            'description','presenter','price'], " ");
+            res.setHeader('Content-Type', 'text/plain');
+            res.send(text);
+        }
+        )
+        .catch((error) => {
+            console.log(error)
+        });
+    });
     
     //--------------------------------For Comments Data CRUD access------------------------------------------------
     //Create the Comments Data 
     app.post('/comment', (req, res) => {
-        Comment.findOne().sort({commentId: -1 }).then((result) => {
+        console.log(req.body);
+        Comment.findOne().sort({commentId: -1 }).populate(['User','location'])
+        .then((result) => {
+            console.log('comment');
             console.log(result.commentId);
-            if (result === null) {
-                let newcommentId = 1;
-                let newComment = new Comment({
-                    commentId: newcommentId,
-                    content: req.body['content'],
-                    User: req.body['User'],
-                    location: req.body['location']
-                });
-                Comment.create(Comment)
-                .then(() => {
-                    res.status(201);
-                    res.redirect('/comment/' + newcommentId);
-                    //res.send('<a href="http://localhost:3000/comment/' + newcommentId + '" target="_blank">http://localhost:3000/comment/' + newcommentId + '</a>');
+            let newCommentId = result.commentId;
+            User.findOne({UserId: req.body.User}).then((result2) => {  
+                console.log('user');
+                console.log(result2.UserId);
+                Venue.findOne({venueID: req.body.location}).then((result3) => {
+                    console.log(result3.venueID);
+                    if (result === null) {
+                        newCommentId = 1;
+                        let newComment = new Comment({
+                            commentId: newCommentId,
+                            content: req.body['content'],
+                            User: result2._id,
+                            location: result3._id
+                        });
+                        Comment.create(Comment)
+                        .then(() => {
+                            res.status(201);
+                            res.redirect('/comment/' + newCommentId);
+                            //res.send('<a href="http://localhost:3000/comment/' + newcommentId + '" target="_blank">http://localhost:3000/comment/' + newcommentId + '</a>');
+                        })
+                        return;
+                    }
+                    newCommentId = result.commentId + 1;
+                    console.log(newCommentId);
+                    let newcomment = new Comment({
+                        commentId: newCommentId,
+                        content: req.body['content'],
+                        User: result2._id,
+                        location: result3._id
+                    });
+                    Comment.create(newcomment)
                 })
-                return;
-            }
-            let newcommentId = result.commentId + 1;
-            let newcomment = new comment({
-                commentId: newcommentId,
-                content: req.body['content'],
-                User: req.body['User'],
-                location: req.body['location']
-            });
-            Comment.create(newcomment)
+            })
+
             .then(() => {
                 res.status(201);
-                res.redirect('/comment/' + newcommentId);
-                //res.send('<a href="http://localhost:3000/comment/' + newcommentId + '" target="_blank">http://localhost:3000/comment/' + newcommentId + '</a>');
+                res.redirect('/comment/' + newCommentId);
+                //res.send('<a href="http://localhost:3000/comment/' + newCommentId + '" target="_blank">http://localhost:3000/comment/' + newCommentId + '</a>');
             })
             .catch((error) => console.log(error));
         });
     });
 
-    //Read the Comments Data
+    //Read the Comments Data by ID
     app.get('/comment/:commentId', (req,res) => {
         Comment.findOne({commentId: req.params['commentId']})
         .then((data) => {
@@ -686,6 +715,11 @@ db.once('open', function () {
             }
         })
         .catch((error) => console.log(error));
+    });
+    
+    //Read the Comments Data by 
+    app.get('/comment2/:commentId', (req,res) => {
+
     });
 
     //Update the Comments Data
@@ -803,7 +837,7 @@ db.once('open', function () {
     app.get('/user/:UserId', (req, res) => {
         User.findOne({ UserId: { $eq: req.params.UserId}})
         .then((p) => {
-            console.log(p);
+            //console.log(p);
             if (p === null) { 
             const message = 'No user with such userID is found';
             res.setHeader('Content-Type', 'text/plain');
@@ -811,18 +845,26 @@ db.once('open', function () {
             res.send(message);
             return;
             };
-            var resultJSON = {
-                "UserId": p.UserId,
-                "UserName": p.UserName,
-                "UserPwHash": p.UserName,
-                "Admin":  p.Admin,
-                "Comments": p.Comments,
-                "Pinned": p.Pinned,
-            }
-            var text = JSON.stringify(resultJSON, null, " ");
-            res.status(200);
-            res.setHeader('Content-Type', 'text/plain');
-            res.send(text);
+            Comment.find({ UserId: { $eq: p._id}})
+            .then((q) => {
+            console.log(q);
+                Venue.find({ UserId: {$eq: p._id}})
+                .then((r) => {
+                    console.log(r);
+                    var resultJSON = {
+                        "UserId": p.UserId,
+                        "UserName": p.UserName,
+                        "UserPwHash": p.UserName,
+                        "Admin":  p.Admin,
+                        "Comments": p.Comments,
+                        "Pinned": p.Pinned,
+                    }            
+                    var text = JSON.stringify(resultJSON, null, " ");
+                    res.status(200);
+                    res.setHeader('Content-Type', 'text/plain');
+                    res.send(text);
+                });
+            });
         })
         .catch((error) => console.log(error));
     });
@@ -830,7 +872,7 @@ db.once('open', function () {
     //Update the users data (admin)
     app.put('/user/:UserId', (req,res) => {
         console.log(req.body);
-        User.findOne({UserId: req.params['UserId']})
+        User.findOneAndUpdate({UserId: req.params['UserId']})
         .populate(['Pinned', 'Comments'])
         .then((result) => {
             console.log(result);
@@ -841,34 +883,69 @@ db.once('open', function () {
                 res.send(message);
                 return;
             }                
-            console.log(User.Comments);
-            //console.log(User.Comments.length);
-            if(User.Comments === null || User.Comments === undefined){
-                let LastComments = 1;
-            }
-            else{
-                let LastComments = User.Comments[User.Comments.length - 1];
-            }
-            if(User.Pinned === null || User.Pinned === undefined ){
-                let LastPinned = 1;
-            }
-            else{
-                let LastPinned = User.Pinned[User.Pinned.length - 1];
-            }
-            result.Comments[LastComments] = req.body.Comments;
-            result.Pinned[LastPinned] =req.body.Pinned;
-            var resultJSON = {
-                "UserId": result.UserId,
-                "UserName": req.body.UserName,
-                "UserPwHash": req.body.UserPwHash,
-                "Admin": req.body.Admin,
-                "Comments": result.Comments,
-                "Pinned": result.Pinned
-            }
-            var text = JSON.stringify(resultJSON,null, " ");
-            res.status(200);
-            res.setHeader('Content-Type', 'text/plain');
-            res.send(text);
+            //console.log(User.Comments);
+            Comment.find({ User: { $eq: result._id}})
+            .then((q) => {
+                console.log(q);
+                Venue.find({ User: {$eq: result._id}})
+                .then((r) => {
+                    let buffer = '[';
+                    let buffer2 = '[';
+                    console.log(r);
+                    if(q === undefined){
+                        result.Comments = [];
+                    }
+                    else{
+                        //to refresh data linker
+                        //q.push(req.body.Comments);
+                        result.Comments = q;
+                    }
+                    if(r === undefined){
+                        result.Pinned = [];
+                    }
+                    else{
+                        //to refresh data linker
+                        //r.push(req.body.Pinned);
+                        result.Pinned = r;
+                    }
+                    
+                    result.UserPwHash = req.body.UserPwHash;
+                    result.Admin = req.body.Admin;
+                    //check the refreshed data
+                    console.log(result.Comments);
+                    console.log(result.Pinned);
+                    let LastEvent = q[q.length - 1];
+                    for (let one of q){
+                        buffer += 
+                        '"_id":{"$oid":' + one._id.oid+
+                        ((one != LastEvent) ? '},' : '}');
+                    }
+                    buffer += ']';
+                    let LastEvent2 = r[r.length - 1];
+                    for (let one of r){
+                        buffer2 += 
+                        '"_id":{"$oid":' + one._id.oid+
+                        ((one != LastEvent2) ? '},' : '}');
+                    }
+                    buffer2 += ']';
+                    console.log("finished");
+                    console.log(buffer);
+                    console.log(buffer2);
+
+                    var resultJSON = {
+                        "UserId": result.UserId,
+                        "UserName": req.body.UserName,
+                        "UserPwHash": req.body.UserPwHash,
+                        "Admin": req.body.Admin,
+                        "Comments": result.Comments,
+                        "Pinned": result.Pinned
+                    }
+                    var text = JSON.stringify(resultJSON,null, " ");
+                    res.status(200);
+                    res.setHeader('Content-Type', 'text/plain');
+                    res.send(text);
+                });
+            });
         });
 
     });
