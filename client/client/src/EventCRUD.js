@@ -288,7 +288,7 @@ class EventCRUD extends React.Component {
 
         try {
             const response = await fetch(`http://localhost:${port}/event`, {    //please change the url
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },

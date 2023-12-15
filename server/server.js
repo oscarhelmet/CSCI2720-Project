@@ -604,20 +604,27 @@ db.once('open', function () {
 
     // Find events whose price under a specific number. (e.g., ≤500) http://localhost:3000/event?price=500
     app.get('/event', (req, res) => {
-        //console.log(req.query.price);
-        const Lowprice = parseInt(req.query.price);
-        if (req.query.price ==null){
-            Event.find({})
-            .then((p) => {
-            console.log(p.length);
-            var text = JSON.stringify(p, null, " ");
-            res.setHeader('Content-Type', 'text/plain');
-            res.send(text);
-            }
-            )
-            .catch((error) => {
-                console.log(error)
-            });
+    //console.log(req.query.price);
+    const Lowprice = parseInt(req.query.price);
+    if (req.query.price ==null){
+        Event.find({})
+        .then((p) => {
+        console.log(p.length);
+        var text = JSON.stringify(p, null, " ");
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(text);
+        }
+        )
+        .catch((error) => {
+            console.log(error)
+        });
+    }
+    Event.find({price: {$elemMatch: { $lte: Lowprice }}})
+        .then((p) => {
+        console.log(p.length);
+        var text = JSON.stringify(p, null, " ");
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(text);
         }
     });
     // Find venue whose name which contain keywords in the name. (e.g., Hong) http://localhost:8000/query/venue/?keywords=Hong
@@ -882,31 +889,36 @@ db.once('open', function () {
         User.find().sort({ UserId: 1})
         .populate('Comments','Pinned')
         .then((p) => {
-            //console.log(p);
-            if (p === null) { 
-            const message = 'No user with such userID is found';
+            
+            console.log(p.length);
+            var text = JSON.stringify(p, null, " ");
             res.setHeader('Content-Type', 'text/plain');
-            res.statusCode = 404;
-            res.send(message);
-            return;
-            };
-            let output = '[\n';
-            let LastUser = p[p.length - 1];
-            for(let one of p){            
-                output+=
-                '{'+                        
-                    '"UserId": ' + one.UserId + ',' +
-                    '"UserName": "' + one.UserName + '",' +
-                    '"UserPwHash": "' + one.UserPwHash + '",' +
-                    '"Admin": ' + one.Admin + ',' +
-                    '"Comments": ' + one.Comments + ',' +
-                    '"Pinned": ' + one.Pinned +
-                ((one != LastUser) ? '},\n' : '}\n');
-            }
-            output += ']';
-            res.status(200);
-            res.setHeader('Content-Type', 'text/plain');
-            res.send(output);
+            res.send(text);
+            console.log(p);
+            // if (p === null) { 
+            // const message = 'No user with such userID is found';
+            // res.setHeader('Content-Type', 'text/plain');
+            // res.statusCode = 404;
+            // res.send(message);
+            // return;
+            // };
+            // let output = '[\n';
+            // let LastUser = p[p.length - 1];
+            // for(let one of p){            
+            //     output+=
+            //     '{'+                        
+            //         '"UserId": ' + one.UserId + ',' +
+            //         '"UserName": "' + one.UserName + '",' +
+            //         '"UserPwHash": "' + one.UserPwHash + '",' +
+            //         '"Admin": ' + one.Admin + ',' +
+            //         '"Comments": ' + one.Comments + ',' +
+            //         '"Pinned": ' + one.Pinned +
+            //     ((one != LastUser) ? '},\n' : '}\n');
+            // }
+            // output += ']';
+            // res.status(200);
+            // res.setHeader('Content-Type', 'text/plain');
+            // res.send(output);
         })
         .catch((error) => console.log(error));
     });
@@ -935,9 +947,11 @@ db.once('open', function () {
                 res.set('Content-Type', 'text/plain');
                 res.send(message);
                 return;
-            }        
-        })
-        .catch((error) => console.log(error));
+            }    
+          
+            res.status(200);
+            res.setHeader('Content-Type', 'text/plain');
+            res.send(text);
     });
 
     //Delete the users data (admin)
