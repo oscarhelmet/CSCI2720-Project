@@ -1008,13 +1008,6 @@ db.once('open', function () {
         .catch((error) => console.log(error));
     });
 
-
-    //Error handling
-    app.all('/', (req, res) => {
-        // send this to client
-        res.send('Backend Connected');
-    });
-
 })
 
 // listen to port 3000
