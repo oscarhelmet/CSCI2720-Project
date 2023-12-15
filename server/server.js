@@ -626,6 +626,19 @@ db.once('open', function () {
     app.get('/event', (req, res) => {
     //console.log(req.query.price);
     const Lowprice = parseInt(req.query.price);
+    if (req.query.price ==null){
+        Event.find({})
+        .then((p) => {
+        console.log(p.length);
+        var text = JSON.stringify(p, null, " ");
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(text);
+        }
+        )
+        .catch((error) => {
+            console.log(error)
+        });
+    }
     Event.find({price: {$elemMatch: { $lte: Lowprice }}})
         .then((p) => {
         console.log(p.length);
@@ -738,10 +751,11 @@ db.once('open', function () {
         .catch((error) => console.log(error));
     });
     
-    //Read the Comments Data by 
-    app.get('/comment2/:commentId', (req,res) => {
-
-    });
+    // //Read the Comments Data by UserId
+    // app.get('/comment2/:UserId', (req,res) => {
+    //     User.findOne({UserId: req.body['UserId']})
+    //     .then((result) => {})
+    // });
 
     //Update the Comments Data
     app.put('/comment/:commentId', (req,res) =>{
@@ -822,9 +836,12 @@ db.once('open', function () {
         const UserName = req.body.UserName;
         const UserPwHash = req.body.UserPwHash;
         const Admin = req.body.Admin;
+        console.log(UserName,UserPwHash,Admin);
         const Comments = null;// append in later Comments CRUD
         const Pinned = null;//append in later Pinned CRUD
-        User.findOne().sort({UserId: -1 }).then((result) => {
+        User.findOne().sort({UserId: -1 })
+        .populate(['Comments','Pinned'])
+        .then((result) => {
             console.log(result.UserId);
             if(result === null){
                 res.status(406);
@@ -857,8 +874,9 @@ db.once('open', function () {
     //Read the users data (admin) //work
     app.get('/user/:UserId', (req, res) => {
         User.findOne({ UserId: { $eq: req.params.UserId}})
+        .populate(['Comments','Pinned'])
         .then((p) => {
-            //console.log(p);
+            console.log(p);
             if (p === null) { 
             const message = 'No user with such userID is found';
             res.setHeader('Content-Type', 'text/plain');
@@ -875,7 +893,7 @@ db.once('open', function () {
                     var resultJSON = {
                         "UserId": p.UserId,
                         "UserName": p.UserName,
-                        "UserPwHash": p.UserName,
+                        "UserPwHash": p.UserPwHash,
                         "Admin":  p.Admin,
                         "Comments": p.Comments,
                         "Pinned": p.Pinned,
@@ -886,6 +904,40 @@ db.once('open', function () {
                     res.send(text);
                 });
             });
+        })
+        .catch((error) => console.log(error));
+    });
+
+    //Read ALL the users data (admin) //work
+    app.get('/user', (req, res) => {
+        User.find().sort({ UserId: 1})
+        .populate('Comments','Pinned')
+        .then((p) => {
+            //console.log(p);
+            if (p === null) { 
+            const message = 'No user with such userID is found';
+            res.setHeader('Content-Type', 'text/plain');
+            res.statusCode = 404;
+            res.send(message);
+            return;
+            };
+            let output = '[\n';
+            let LastUser = p[p.length - 1];
+            for(let one of p){            
+                output+=
+                '{'+                        
+                    '"UserId": ' + one.UserId + ',' +
+                    '"UserName": "' + one.UserName + '",' +
+                    '"UserPwHash": "' + one.UserPwHash + '",' +
+                    '"Admin": ' + one.Admin + ',' +
+                    '"Comments": ' + one.Comments + ',' +
+                    '"Pinned": ' + one.Pinned +
+                ((one != LastUser) ? '},\n' : '}\n');
+            }
+            output += ']';
+            res.status(200);
+            res.setHeader('Content-Type', 'text/plain');
+            res.send(output);
         })
         .catch((error) => console.log(error));
     });
@@ -990,17 +1042,6 @@ db.once('open', function () {
         .catch((error) => console.log(error));
     });
 
-
-    //Error handling
-    // app.all('/', (req, res) => {
-    //     // send this to client
-    //     res.send('Hello World!');
-    // });
-    // // handle ALL requests
-    // app.all('/*', (req, res) => {
-    //     // send this to client
-    //     res.send('Error! (URL doesn\'t exist)');
-    // });
 })
 
 // listen to port 3000
