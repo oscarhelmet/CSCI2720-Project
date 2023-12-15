@@ -105,7 +105,10 @@
     <br>
     <input type="button" value="updatecomment" id="updatecomment">
     <input type="button" value="createcomment" id="createcomment">
-
+  </form>
+  <form id="editPinnedForm">
+    <p>Update Pinned Information</p>
+  </form>
   <script>
     // prepare the data in JSON format
     document.getElementById('searchForm').addEventListener('submit', async (event) => {
@@ -287,6 +290,30 @@
         mode: "cors"
       });
       console.log("Create User");
+      const resultMessage = await response.text();
+      console.log(resultMessage);
+    });
+    document.getElementById('updatecomment').addEventListener('click', async (event) => {
+      const commentId = document.getElementById('commentId').value;
+      const content = document.getElementById('content').value;
+      const User = document.getElementById('User').value;
+      const location = document.getElementById('location').value;
+      const data = {
+        commentId: commentId,
+        content: content,
+        User: User,
+        location: location
+      };
+      console.log(data);
+      const response = await fetch('http://localhost:3000/comment/' + commentId , { //put your server address here
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+        mode: "cors"
+      });
+      console.log("Update User");
       const resultMessage = await response.text();
       console.log(resultMessage);
     });
