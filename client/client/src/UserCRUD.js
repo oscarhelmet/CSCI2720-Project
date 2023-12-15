@@ -214,7 +214,7 @@ class UserCRUD extends React.Component {
 
 
         try {
-            const response = await fetch(`http://localhost:${port}/user`, {    //please change the url
+            const response = await fetch(`http://localhost:${port}/user/`+this.state.UserId, {    //please change the url
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
