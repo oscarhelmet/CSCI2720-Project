@@ -1,5 +1,5 @@
-# CSCI2720 Project
-
+# WebApp Project - Cultural Web
+ 
 # Run ```npm install ``` to re-activate the packages. Do not push the node_module to the repo. Tell me if you have installed a new package. 
 
    ## File Structure 
@@ -16,10 +16,4 @@
         1. Packages: {Express, Mongoose}
         2. MongoDB: 
 
-
-  ##  Usage:
-        1. 
-        2.
-        3.
-        4.
     
